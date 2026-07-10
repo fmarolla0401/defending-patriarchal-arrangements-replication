@@ -1,0 +1,599 @@
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/Francesco/Desktop/POSTDOC_MILANO_STATALE/PROJECTS/ONGOING/Special_Issue_Family_Gender_Roles/DATA/Replication_Package/Output/Logs/01_Data_Preparation__9_Jul_2026.log
+  log type:  text
+ opened on:   9 Jul 2026, 14:19:30
+
+. 
+. * Load the raw dataset (see Input/README.txt for how to obtain this file --
+. * it is not redistributed in this package due to GESIS/ISSP data-use terms)
+. use "$INPUT/ZA10000_v2-0-0.dta", clear
+
+. 
+. ********************************************************************************
+. * GEOGRAPHIC RESTRICTION: Keep only European countries
+. ********************************************************************************
+. * This drops non-European democracies and electoral autocracies to ensure
+. * theoretical consistency regarding the PRR and post-industrial labor markets.
+. * Note: this list includes Iceland (352), which is dropped later from the
+. * analytic sample because no PRR party is coded there (see Appendix Table A11).
+. keep if inlist(country, 40, 100, 191, 203, 208, 246, 250, 276, 300, 348, ///
+>                         352, 380, 440, 528, 578, 616, 703, 705, 724, 752, 756)
+(16,799 observations deleted)
+
+. 
+. * =========================================================================
+. * DEPENDENT VARIABLE PREPARATION: Populist Radical Right (PRR) Vote
+. * =========================================================================
+. * Coding rule: Only parties explicitly categorized as "Far Right" (1 or 1*)
+. * in the PopuList 3.0 database are coded as 1. All other valid votes are 0.
+. * Full party-by-country listing: Online Appendix Table A1.
+. 
+. gen rr_vote = .
+(28,963 missing values generated)
+
+. label variable rr_vote "Voted for a Populist Radical Right Party"
+
+. 
+. * Austria (AT_PRTY) - PopuList Far Right: FPÖ
+. replace rr_vote = 0 if inrange(AT_PRTY, 1, 95)
+(617 real changes made)
+
+. replace rr_vote = 1 if AT_PRTY == 3
+(63 real changes made)
+
+. 
+. * Bulgaria (BG_PRTY) - PopuList Far Right: Revival (Vazrazhdane)
+. replace rr_vote = 0 if inrange(BG_PRTY, 1, 95)
+(755 real changes made)
+
+. replace rr_vote = 1 if BG_PRTY == 8
+(29 real changes made)
+
+. 
+. * Switzerland (CH_PRTY) - PopuList Far Right: SVP, EDU, Lega
+. replace rr_vote = 0 if inrange(CH_PRTY, 1, 95)
+(1,384 real changes made)
+
+. replace rr_vote = 1 if inlist(CH_PRTY, 1, 9, 10)
+(248 real changes made)
+
+. 
+. * Czech Republic (CZ_PRTY) - PopuList Far Right: SPD
+. replace rr_vote = 0 if inrange(CZ_PRTY, 1, 95)
+(730 real changes made)
+
+. replace rr_vote = 1 if CZ_PRTY == 4
+(79 real changes made)
+
+. 
+. * Germany (DE_PRTY) - PopuList Far Right: AfD
+. replace rr_vote = 0 if inrange(DE_PRTY, 1, 95)
+(1,023 real changes made)
+
+. replace rr_vote = 1 if DE_PRTY == 3
+(76 real changes made)
+
+. 
+. * Denmark (DK_PRTY) - PopuList Far Right: DF, NB (Nye Borgerlige)
+. replace rr_vote = 0 if inrange(DK_PRTY, 1, 95)
+(1,191 real changes made)
+
+. replace rr_vote = 1 if inlist(DK_PRTY, 4, 9)
+(101 real changes made)
+
+. 
+. * Spain (ES_PRTY) - PopuList Far Right: VOX
+. replace rr_vote = 0 if inrange(ES_PRTY, 1, 95)
+(876 real changes made)
+
+. replace rr_vote = 1 if ES_PRTY == 3
+(52 real changes made)
+
+. 
+. * Finland (FI_PRTY) - PopuList Far Right: PS (Finns Party)
+. replace rr_vote = 0 if inrange(FI_PRTY, 1, 95)
+(787 real changes made)
+
+. replace rr_vote = 1 if FI_PRTY == 2
+(105 real changes made)
+
+. 
+. * France (FR_PRTY) - PopuList Far Right: RN, Reconquête, DLR (Debout la République)
+. replace rr_vote = 0 if inrange(FR_PRTY, 1, 95)
+(1,653 real changes made)
+
+. replace rr_vote = 1 if inlist(FR_PRTY, 10, 11, 12)
+(291 real changes made)
+
+. 
+. * Greece (GR_PRTY) - PopuList Far Right: EL (Greek Solution)
+. * (Note: NIKI is not classified in PopuList)
+. replace rr_vote = 0 if inrange(GR_PRTY, 1, 95)
+(928 real changes made)
+
+. replace rr_vote = 1 if GR_PRTY == 5
+(17 real changes made)
+
+. 
+. * Croatia (HR_PRTY) - PopuList Far Right: DP, MOST/Sovereigntists
+. replace rr_vote = 0 if inrange(HR_PRTY, 1, 95)
+(617 real changes made)
+
+. replace rr_vote = 1 if inlist(HR_PRTY, 4, 5)
+(68 real changes made)
+
+. 
+. * Hungary (HU_PRTY) - PopuList Far Right: Fidesz-KDNP, MHM (Our Homeland)
+. replace rr_vote = 0 if inrange(HU_PRTY, 1, 95)
+(674 real changes made)
+
+. replace rr_vote = 1 if inlist(HU_PRTY, 1, 3)
+(422 real changes made)
+
+. 
+. * Italy (IT_PRTY) - PopuList Far Right: FdI, Lega
+. replace rr_vote = 0 if inrange(IT_PRTY, 1, 95)
+(537 real changes made)
+
+. replace rr_vote = 1 if inlist(IT_PRTY, 1, 2)
+(215 real changes made)
+
+. 
+. * Lithuania (LT_PRTY) - PopuList Far Right: NS (National Alliance)
+. replace rr_vote = 0 if inrange(LT_PRTY, 1, 95)
+(486 real changes made)
+
+. replace rr_vote = 1 if LT_PRTY == 7
+(4 real changes made)
+
+. 
+. * Netherlands (NL_PRTY) - PopuList Far Right: PVV, BBB, FvD, JA21
+. replace rr_vote = 0 if inrange(NL_PRTY, 1, 95)
+(1,341 real changes made)
+
+. replace rr_vote = 1 if inlist(NL_PRTY, 1, 6, 11, 15)
+(329 real changes made)
+
+. 
+. * Norway (NO_PRTY) - PopuList Far Right: FrP
+. replace rr_vote = 0 if inrange(NO_PRTY, 1, 95)
+(955 real changes made)
+
+. replace rr_vote = 1 if NO_PRTY == 2
+(58 real changes made)
+
+. 
+. * Poland (PL_PRTY) - PopuList Far Right: Konfederacja, PiS
+. replace rr_vote = 0 if inrange(PL_PRTY, 1, 95)
+(604 real changes made)
+
+. replace rr_vote = 1 if inlist(PL_PRTY, 3, 5)
+(330 real changes made)
+
+. 
+. * Sweden (SE_PRTY) - PopuList Far Right: SD
+. replace rr_vote = 0 if inrange(SE_PRTY, 1, 95)
+(1,324 real changes made)
+
+. replace rr_vote = 1 if SE_PRTY == 7
+(147 real changes made)
+
+. 
+. * Slovenia (SI_PRTY) - PopuList Far Right: SNS, SDS, NSi
+. replace rr_vote = 0 if inrange(SI_PRTY, 1, 95)
+(692 real changes made)
+
+. replace rr_vote = 1 if inlist(SI_PRTY, 4, 5, 6)
+(195 real changes made)
+
+. 
+. * Slovakia (SK_PRTY) - PopuList Far Right: SME Rodina, SNS, VLAST, L'SNS
+. replace rr_vote = 0 if inrange(SK_PRTY, 1, 95)
+(575 real changes made)
+
+. replace rr_vote = 1 if inlist(SK_PRTY, 4, 9, 17, 24)
+(127 real changes made)
+
+. 
+. label define rr_vote_lbl 0 "Other Party" 1 "Populist Radical Right"
+
+. label values rr_vote rr_vote_lbl
+
+. tab rr_vote, missing
+
+  Voted for a Populist |
+   Radical Right Party |      Freq.     Percent        Cum.
+-----------------------+-----------------------------------
+           Other Party |     14,793       51.08       51.08
+Populist Radical Right |      2,956       10.21       61.28
+                     . |     11,214       38.72      100.00
+-----------------------+-----------------------------------
+                 Total |     28,963      100.00
+
+. 
+. * =========================================================================
+. * INDEPENDENT VARIABLES: The Three Dimensions of Patriarchy
+. * =========================================================================
+. * These continuous variables capture specific patriarchal attitudes that
+. * will be interacted with Gender to explain the PRR gap.
+. 
+. * -------------------------------------------------------------------------
+. * Public Patriarchy: Strongman Demand (Political Masculinity)
+. * -------------------------------------------------------------------------
+. clonevar male_pol_lead = v57
+
+. recode male_pol_lead (-9 -8 = .)
+(964 changes made to male_pol_lead)
+
+. 
+. label define lead_pref_lbl 1 "Women much better" ///
+>                            2 "Women somewhat better" ///
+>                            3 "Equally suited" ///
+>                            4 "Men somewhat better" ///
+>                            5 "Men much better"
+
+. label values male_pol_lead lead_pref_lbl
+
+. label variable male_pol_lead "Prefers Male Political Leadership (Cabinet)"
+
+. 
+. * -------------------------------------------------------------------------
+. * 1b. Public Patriarchy: Economic & Academic Leadership (Placebo Tests)
+. * -------------------------------------------------------------------------
+. clonevar male_acad_lead = v58
+
+. clonevar male_econ_lead = v59
+
+. 
+. * Recode missing values
+. recode male_acad_lead male_econ_lead (-9 -8 = .)
+(1,093 changes made to male_acad_lead)
+(920 changes made to male_econ_lead)
+
+. 
+. * Apply the exact same 1-5 label used for political leadership
+. label values male_acad_lead male_econ_lead lead_pref_lbl
+
+. 
+. label variable male_acad_lead "Prefers Male Academic Leadership (University)"
+
+. label variable male_econ_lead "Prefers Male Economic Leadership (Executive)"
+
+. 
+. tab1 male_acad_lead male_econ_lead, missing
+
+-> tabulation of male_acad_lead  
+
+Prefers Male Academic |
+           Leadership |
+         (University) |      Freq.     Percent        Cum.
+----------------------+-----------------------------------
+    Women much better |        482        1.66        1.66
+Women somewhat better |      1,079        3.73        5.39
+       Equally suited |     23,396       80.78       86.17
+  Men somewhat better |      2,044        7.06       93.23
+      Men much better |        869        3.00       96.23
+                    . |      1,093        3.77      100.00
+----------------------+-----------------------------------
+                Total |     28,963      100.00
+
+-> tabulation of male_econ_lead  
+
+Prefers Male Economic |
+           Leadership |
+          (Executive) |      Freq.     Percent        Cum.
+----------------------+-----------------------------------
+    Women much better |        497        1.72        1.72
+Women somewhat better |        911        3.15        4.86
+       Equally suited |     22,424       77.42       82.28
+  Men somewhat better |      2,948       10.18       92.46
+      Men much better |      1,263        4.36       96.82
+                    . |        920        3.18      100.00
+----------------------+-----------------------------------
+                Total |     28,963      100.00
+
+. 
+. * -------------------------------------------------------------------------
+. * Productive Patriarchy: Traditional Breadwinner Norm
+. * -------------------------------------------------------------------------
+. clonevar trad_bwnorm = v6
+
+. recode trad_bwnorm (-9 -8 = .)
+(476 changes made to trad_bwnorm)
+
+. 
+. * Recode so 5=Strongly Agree (Higher = More Traditional)
+. recode trad_bwnorm (1=5) (2=4) (3=3) (4=2) (5=1)
+(23,933 changes made to trad_bwnorm)
+
+. label define trad_bwnorm_lbl 1 "Strongly disagree" 2 "Disagree" ///
+>                              3 "Neither agree nor disagree" 4 "Agree" ///
+>                              5 "Strongly agree"
+
+. label values trad_bwnorm trad_bwnorm_lbl
+
+. label variable trad_bwnorm "Men should earn, Women look after home (High=Agree)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Private Patriarchy: Normative Policing of Family Roles
+. * -------------------------------------------------------------------------
+. clonevar gay_father = v18
+
+. recode gay_father (-9 -8 = .)
+(1,283 changes made to gay_father)
+
+. 
+. * Already in the correct direction (5=Strongly Disagree / Higher = Rejection)
+. label define agree_policing_lbl 1 "Strongly agree" 2 "Agree" ///
+>                                 3 "Neither agree nor disagree" 4 "Disagree" ///
+>                                 5 "Strongly disagree"
+
+. label values gay_father agree_policing_lbl
+
+. label variable gay_father "Same-sex male couple can raise child as well (High=Disagree)"
+
+. 
+. tab1 male_pol_lead trad_bwnorm gay_father, missing
+
+-> tabulation of male_pol_lead  
+
+         Prefers Male |
+ Political Leadership |
+            (Cabinet) |      Freq.     Percent        Cum.
+----------------------+-----------------------------------
+    Women much better |        617        2.13        2.13
+Women somewhat better |      1,199        4.14        6.27
+       Equally suited |     22,620       78.10       84.37
+  Men somewhat better |      2,471        8.53       92.90
+      Men much better |      1,092        3.77       96.67
+                    . |        964        3.33      100.00
+----------------------+-----------------------------------
+                Total |     28,963      100.00
+
+-> tabulation of trad_bwnorm  
+
+    Men should earn, Women |
+           look after home |
+              (High=Agree) |      Freq.     Percent        Cum.
+---------------------------+-----------------------------------
+         Strongly disagree |     12,466       43.04       43.04
+                  Disagree |      6,551       22.62       65.66
+Neither agree nor disagree |      4,554       15.72       81.38
+                     Agree |      3,316       11.45       92.83
+            Strongly agree |      1,600        5.52       98.36
+                         . |        476        1.64      100.00
+---------------------------+-----------------------------------
+                     Total |     28,963      100.00
+
+-> tabulation of gay_father  
+
+  Same-sex male couple can |
+       raise child as well |
+           (High=Disagree) |      Freq.     Percent        Cum.
+---------------------------+-----------------------------------
+            Strongly agree |      7,425       25.64       25.64
+                     Agree |      7,157       24.71       50.35
+Neither agree nor disagree |      3,884       13.41       63.76
+                  Disagree |      4,583       15.82       79.58
+         Strongly disagree |      4,631       15.99       95.57
+                         . |      1,283        4.43      100.00
+---------------------------+-----------------------------------
+                     Total |     28,963      100.00
+
+. 
+. 
+. * =========================================================================
+. * CONTROL VARIABLES: Socio-Demographics & Economic Grievance
+. * =========================================================================
+. 
+. * -------------------------------------------------------------------------
+. * Economic Precarity (Control for "Losers of Globalization" thesis)
+. * -------------------------------------------------------------------------
+. clonevar econ_diff = v60
+
+. recode econ_diff (-9 -8 = .)
+(851 changes made to econ_diff)
+
+. 
+. * Recode so 5=Very difficult (Higher = More Precarity)
+. recode econ_diff (1=5) (2=4) (3=3) (4=2) (5=1)
+(17,526 changes made to econ_diff)
+
+. label define econ_diff_lbl 1 "Very easy" 2 "Fairly easy" ///
+>                            3 "Neither easy nor difficult" 4 "Fairly difficult" ///
+>                            5 "Very difficult"
+
+. label values econ_diff econ_diff_lbl
+
+. label variable econ_diff "Difficulty making ends meet (High=Very difficult)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Gender (SEX)
+. * -------------------------------------------------------------------------
+. clonevar gender = SEX
+
+. recode gender (-9 = .)
+(45 changes made to gender)
+
+. gen male = (gender == 1) if !missing(gender)
+(45 missing values generated)
+
+. label variable male "Male Respondent (Dummy)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Age (AGE)
+. * -------------------------------------------------------------------------
+. clonevar age = AGE
+
+. recode age (-9 = .)
+(249 changes made to age)
+
+. label variable age "Age of Respondent (Years)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Education (EDULEVEL) - 3 Categories
+. * -------------------------------------------------------------------------
+. clonevar educ = EDULEVEL
+
+. recode educ (-9 -8 = .)
+(766 changes made to educ)
+
+. gen educ_3cat = .
+(28,963 missing values generated)
+
+. replace educ_3cat = 1 if inrange(educ, 0, 2)
+(3,910 real changes made)
+
+. replace educ_3cat = 2 if inrange(educ, 3, 4)
+(12,455 real changes made)
+
+. replace educ_3cat = 3 if inrange(educ, 5, 8)
+(11,832 real changes made)
+
+. label define educ_3cat_lbl 1 "Low Education" 2 "Medium Education" 3 "High Education"
+
+. label values educ_3cat educ_3cat_lbl
+
+. label variable educ_3cat "Highest Level of Education (3 Categories)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Urban/Rural Residence (URBRURAL)
+. * -------------------------------------------------------------------------
+. clonevar urbrural = URBRURAL
+
+. recode urbrural (-9 -8 = .)
+(568 changes made to urbrural)
+
+. gen urban = (urbrural == 1 | urbrural == 2) if !missing(urbrural)
+(568 missing values generated)
+
+. label variable urban "Lives in Urban Area (City/Suburbs)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Religiosity (ATTEND) - Reversed to High = Frequent
+. * -------------------------------------------------------------------------
+. clonevar relig_attend = ATTEND
+
+. recode relig_attend (-9 -8 -7 = .)
+(965 changes made to relig_attend)
+
+. recode relig_attend (1=8) (2=7) (3=6) (4=5) (5=4) (6=3) (7=2) (8=1)
+(27,998 changes made to relig_attend)
+
+. label define relig_attend_lbl 1 "Never" 2 "Less than once a year" ///
+>                               3 "Once a year" 4 "Several times a year" ///
+>                               5 "Once a month" 6 "2 or 3 times a month" ///
+>                               7 "Once a week" 8 "Several times a week"
+
+. label values relig_attend relig_attend_lbl
+
+. label variable relig_attend "Religious Attendance (High = Frequent)"
+
+. 
+. * -------------------------------------------------------------------------
+. * Employment Status (WORK)
+. * -------------------------------------------------------------------------
+. clonevar work_stat = WORK
+
+. recode work_stat (-9 = .)
+(672 changes made to work_stat)
+
+. gen in_work = (work_stat == 1) if !missing(work_stat)
+(672 missing values generated)
+
+. label variable in_work "Currently in Paid Work (Dummy)"
+
+. 
+. * =========================================================================
+. * SES: Oesch 8-Class Occupational Schema (via iscooesch package)
+. * =========================================================================
+. clonevar isco_clean = ISCO08
+
+. recode isco_clean (-9 -8 -6 -4 = .)
+(3,720 changes made to isco_clean)
+
+. 
+. * Clean EMPREL for the package
+. gen emp_clean = .
+(28,963 missing values generated)
+
+. replace emp_clean = 1 if EMPREL == 1
+(22,551 real changes made)
+
+. replace emp_clean = 2 if inlist(EMPREL, 2, 3, 4)
+(3,032 real changes made)
+
+. replace emp_clean = 3 if EMPREL == 5
+(584 real changes made)
+
+. 
+. * Clean EMPLNO (Number of supervised employees)
+. clonevar emplno_clean = NSUP
+
+. recode emplno_clean (-9 -8 -4 = .)
+(22,058 changes made to emplno_clean)
+
+. replace emplno_clean = 0 if EMPREL == 1 & WRKSUP == 2
+(16,531 real changes made)
+
+. replace emplno_clean = 1 if EMPREL == 1 & WRKSUP == 1 & missing(emplno_clean)
+(296 real changes made)
+
+. replace emplno_clean = 0 if EMPREL == 2
+(1,862 real changes made)
+
+. replace emplno_clean = 5 if EMPREL == 3
+(802 real changes made)
+
+. replace emplno_clean = 10 if EMPREL == 4
+(273 real changes made)
+
+. 
+. * Generate the 8-class schema
+. iscooesch class, isco(isco_clean) emplrel(emp_clean) emplno(emplno_clean) eight replace
+Converting ISCO08 codes to Oesch classification.
+Created 8-class variable:
+oesch8_class
+
+ class Oesch class position - 8 classes |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Self-employed professionals and large e |        821        3.26        3.26
+                  Small business owners |      2,494        9.92       13.18
+         Technical (semi-)professionals |      2,196        8.73       21.92
+                     Production workers |      3,895       15.49       37.40
+                   (Associate) managers |      4,548       18.09       55.49
+                                 Clerks |      2,830       11.25       66.74
+    Socio-cultural (semi-)professionals |      3,973       15.80       82.54
+                        Service workers |      4,390       17.46      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     25,147      100.00
+
+. 
+. * Recovering the "Never Worked" Population
+. replace oesch8_class = 9 if WORK == 3
+(1,420 real changes made)
+
+. label define oesch8_class 9 "Never Worked / Outside Labor Force", add
+
+. label values oesch8_class oesch8_class
+
+. 
+. * Final save of fully harmonized dataset
+. save "$OUT_DATA/Analysis_data.dta", replace
+file C:/Users/Francesco/Desktop/POSTDOC_MILANO_STATALE/PROJECTS/ONGOING/Special_Issue_Family_Gender_Roles/DATA/Replication_Package/Output/Data/Analysis_data.dta saved
+
+. 
+. * Close log file
+. log close
+      name:  <unnamed>
+       log:  C:/Users/Francesco/Desktop/POSTDOC_MILANO_STATALE/PROJECTS/ONGOING/Special_Issue_Family_Gender_Roles/DATA/Replication_Package/Output/Logs/01_Data_Preparation__9_Jul_2026.log
+  log type:  text
+ closed on:   9 Jul 2026, 14:19:32
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

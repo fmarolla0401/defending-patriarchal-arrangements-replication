@@ -1,0 +1,2750 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/Francesco/Desktop/POSTDOC_MILANO_STATALE/PROJECTS/ONGOING
+> /Special_Issue_Family_Gender_Roles/DATA/Replication_Package/Output/Logs/03_Su
+> pplementary_Material__9_Jul_2026.log
+  log type:  text
+ opened on:   9 Jul 2026, 10:29:58
+
+. 
+. * NOTE ON STRUCTURE: This do-file reproduces, in order, every table of the
+. * Online Appendix (Tables A1-A16; see Partiarchal_Arrangements_PRR_Online_
+. * Appendix.md). Table A6 (domain-specificity comparison) is estimated here
+. * even though the identical models also appear in 02_Data_Analysis.do,
+. * so that this single do-file can reproduce the full appendix on its own.
+. * Table A1 is not reproduced as Stata output (see the note at that section
+. * below). The Online Appendix contains no figures, so the class-heterogeneity
+. * marginsplots present in earlier drafts of this do-file (for the breadwinner
+> -
+. * norm and same-sex-fathers triple interactions) have been removed; the
+. * underlying models (lpm_m5, lpm_m6, lpm_m7) are retained because they still
+. * supply Tables A8-A10.
+. 
+. * GEOGRAPHIC RESTRICTION: Keep only European countries
+. keep if inlist(country, 40, 100, 191, 203, 208, 246, 250, 276, 300, 348, ///
+>                         352, 380, 440, 528, 578, 616, 703, 705, 724, 752, 756
+> )
+(0 observations deleted)
+
+. 
+. * Create the strict estimation sample flag
+. capture drop estimation_sample
+
+. gen estimation_sample = 1
+
+. 
+. replace estimation_sample = 0 if missing(rr_vote, male, age, educ_3cat, oesch
+> 8_class, urban)
+(12,662 real changes made)
+
+. replace estimation_sample = 0 if missing(relig_attend, in_work, econ_diff)
+(510 real changes made)
+
+. replace estimation_sample = 0 if missing(male_pol_lead, trad_bwnorm, gay_fath
+> er, country)
+(828 real changes made)
+
+. 
+. * Keep only countries where a PRR party is actually available
+. capture drop prr_available
+
+. bysort country: egen prr_available = max(rr_vote)
+(1,220 missing values generated)
+
+. replace estimation_sample = 0 if prr_available != 1
+(0 real changes made)
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * TABLE A1. Populist Radical Right Parties Coded in this Study
+. *****************************************************************************
+> ***
+. * NOT reproduced here. Table A1 lists, by country, the specific party names
+. * classified as "Far Right" under PopuList 3.0 (e.g., Austria - FPOe, Germany
+>  -
+. * AfD). Party NAMES are not stored as string variables in Analysis_data.dta -
+> -
+. * only the numeric *_PRTY codes used to construct rr_vote are. The
+. * authoritative source for this table is the country-by-country coding block
+. * in 01_Data_Preparation.do (search "DEPENDENT VARIABLE PREPARATION"). Table
+. * A1 is a hand-maintained reference table, not a Stata output.
+. 
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A2. Descriptive Statistics of the Analytical Sample
+. * -------------------------------------------------------------------------
+. preserve
+
+. 
+. levelsof educ_3cat if estimation_sample == 1, local(ed_levels)
+1 2 3
+
+. foreach l of local ed_levels {
+  2.     local lbl : label (educ_3cat) `l'
+  3.     quietly gen educ_dummy_`l' = (educ_3cat == `l') if !missing(educ_3cat)
+  4.     label variable educ_dummy_`l' "Education: `lbl'"
+  5. }
+
+. 
+. levelsof oesch8_class if estimation_sample == 1, local(oesch_levels)
+1 2 3 4 5 6 7 8 9
+
+. foreach l of local oesch_levels {
+  2.     local lbl : label (oesch8_class) `l'
+  3.     quietly gen oesch_dummy_`l' = (oesch8_class == `l') if !missing(oesch8
+> _class)
+  4.     label variable oesch_dummy_`l' "Class: `lbl'"
+  5. }
+
+. 
+. estpost summarize rr_vote male male_pol_lead trad_bwnorm gay_father ///
+>     econ_diff age urban relig_attend in_work ///
+>     educ_dummy_* oesch_dummy_* ///
+>     if estimation_sample == 1, detail
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd) 
+-------------+-------------------------------------------------------
+     rr_vote |     14963      14963   .1683486   .1400167   .3741881 
+        male |     14963      14963   .4721647   .2492419   .4992413 
+male_pol_l~d |     14963      14963   3.080532    .355832   .5965166 
+ trad_bwnorm |     14963      14963    2.04598   1.540728    1.24126 
+  gay_father |     14963      14963   2.666644   2.094721   1.447315 
+   econ_diff |     14963      14963    2.67707   1.143671   1.069425 
+         age |     14963      14963   53.03308   273.0552   16.52438 
+       urban |     14963      14963   .3785337   .2352617   .4850378 
+relig_attend |     14963      14963   2.783733   3.773036    1.94243 
+     in_work |     14963      14963   .6252757   .2343217   .4840678 
+educ_dummy_1 |     14963      14963   .1104725   .0982749   .3134883 
+educ_dummy_2 |     14963      14963   .4225757   .2440218   .4939856 
+educ_dummy_3 |     14963      14963   .4669518   .2489245   .4989233 
+oesch_dumm~1 |     14963      14963   .0340841   .0329246   .1814512 
+oesch_dumm~2 |     14963      14963   .0953017   .0862251   .2936411 
+oesch_dumm~3 |     14963      14963   .0910245   .0827446   .2876536 
+oesch_dumm~4 |     14963      14963   .1341977   .1161964    .340876 
+oesch_dumm~5 |     14963      14963   .1949475   .1569535   .3961736 
+oesch_dumm~6 |     14963      14963   .1053265   .0942391   .3069839 
+oesch_dumm~7 |     14963      14963   .1652743    .137968   .3714404 
+oesch_dumm~8 |     14963      14963   .1447571   .1238107   .3518675 
+oesch_dumm~9 |     14963      14963   .0350865   .0338577   .1840047 
+
+             | e(skewn~)  e(kurto~)     e(sum)     e(min)     e(max) 
+-------------+-------------------------------------------------------
+     rr_vote |  1.772705   4.142482       2519          0          1 
+        male |  .1115142   1.012435       7065          0          1 
+male_pol_l~d |  .4782967    8.10634      46094          1          5 
+ trad_bwnorm |  .9307191   2.689947      30614          1          5 
+  gay_father |  .3620356    1.73223      39901          1          5 
+   econ_diff |  .0975707   2.364834      40057          1          5 
+         age | -.1153059   2.115695     793534         16        100 
+       urban |  .5008696    1.25087       5664          0          1 
+relig_attend |  .9595152   2.954921      41653          1          8 
+     in_work | -.5176129   1.267923       9356          0          1 
+educ_dummy_1 |    2.4852   7.176219       1653          0          1 
+educ_dummy_2 |  .3134784   1.098269       6323          0          1 
+educ_dummy_3 |  .1324824   1.017552       6987          0          1 
+oesch_dumm~1 |  5.135611    27.3745        510          0          1 
+oesch_dumm~2 |  2.756507   8.598328       1426          0          1 
+oesch_dumm~3 |  2.843623    9.08619       1362          0          1 
+oesch_dumm~4 |   2.14632   5.606691       2008          0          1 
+oesch_dumm~5 |  1.540046    3.37174       2917          0          1 
+oesch_dumm~6 |  2.571384   7.612015       1576          0          1 
+oesch_dumm~7 |  1.802372   4.248544       2473          0          1 
+oesch_dumm~8 |  2.019253   5.077384       2166          0          1 
+oesch_dumm~9 |  5.053446   26.53731        525          0          1 
+
+             |     e(p1)      e(p5)     e(p10)     e(p25)     e(p50) 
+-------------+-------------------------------------------------------
+     rr_vote |         0          0          0          0          0 
+        male |         0          0          0          0          0 
+male_pol_l~d |         1          2          3          3          3 
+ trad_bwnorm |         1          1          1          1          2 
+  gay_father |         1          1          1          1          2 
+   econ_diff |         1          1          1          2          3 
+         age |        20         25         30         40         54 
+       urban |         0          0          0          0          0 
+relig_attend |         1          1          1          1          2 
+     in_work |         0          0          0          0          1 
+educ_dummy_1 |         0          0          0          0          0 
+educ_dummy_2 |         0          0          0          0          0 
+educ_dummy_3 |         0          0          0          0          0 
+oesch_dumm~1 |         0          0          0          0          0 
+oesch_dumm~2 |         0          0          0          0          0 
+oesch_dumm~3 |         0          0          0          0          0 
+oesch_dumm~4 |         0          0          0          0          0 
+oesch_dumm~5 |         0          0          0          0          0 
+oesch_dumm~6 |         0          0          0          0          0 
+oesch_dumm~7 |         0          0          0          0          0 
+oesch_dumm~8 |         0          0          0          0          0 
+oesch_dumm~9 |         0          0          0          0          0 
+
+             |    e(p75)     e(p90)     e(p95)     e(p99) 
+-------------+--------------------------------------------
+     rr_vote |         0          1          1          1 
+        male |         1          1          1          1 
+male_pol_l~d |         3          4          4          5 
+ trad_bwnorm |         3          4          5          5 
+  gay_father |         4          5          5          5 
+   econ_diff |         3          4          4          5 
+         age |        66         74         78         85 
+       urban |         1          1          1          1 
+relig_attend |         4          6          7          8 
+     in_work |         1          1          1          1 
+educ_dummy_1 |         0          1          1          1 
+educ_dummy_2 |         1          1          1          1 
+educ_dummy_3 |         1          1          1          1 
+oesch_dumm~1 |         0          0          0          1 
+oesch_dumm~2 |         0          0          1          1 
+oesch_dumm~3 |         0          0          1          1 
+oesch_dumm~4 |         0          1          1          1 
+oesch_dumm~5 |         0          1          1          1 
+oesch_dumm~6 |         0          1          1          1 
+oesch_dumm~7 |         0          1          1          1 
+oesch_dumm~8 |         0          1          1          1 
+oesch_dumm~9 |         0          0          0          1 
+
+. 
+. esttab ., ///
+>     cells("count(fmt(0) label(N)) mean(fmt(3)) sd(fmt(3)) min(fmt(0)) max(fmt
+> (0))") ///
+>     nomtitle nonumber noobs label ///
+>     title("Table A2. Descriptive Statistics of the Analytical Sample")
+
+Table A2. Descriptive Statistics of the Analytical Sample
+-------------------------------------------------------------------------------
+> ------
+                                N         mean           sd          min       
+>    max
+-------------------------------------------------------------------------------
+> ------
+Voted for a Populi~g        14963        0.168        0.374            0       
+>      1
+Male Respondent (D~)        14963        0.472        0.499            0       
+>      1
+Prefers Male Polit~i        14963        3.081        0.597            1       
+>      5
+Men should earn, W~e        14963        2.046        1.241            1       
+>      5
+Same-sex male coup~c        14963        2.667        1.447            1       
+>      5
+Difficulty making ~g        14963        2.677        1.069            1       
+>      5
+Age of Respondent ~)        14963       53.033       16.524           16       
+>    100
+Lives in Urban Are~b        14963        0.379        0.485            0       
+>      1
+Religious Attendan~e        14963        2.784        1.942            1       
+>      8
+Currently in Paid ~)        14963        0.625        0.484            0       
+>      1
+Education: Low Edu~n        14963        0.110        0.313            0       
+>      1
+Education: Medium ~n        14963        0.423        0.494            0       
+>      1
+Education: High Ed~n        14963        0.467        0.499            0       
+>      1
+Class: Self-employ~a        14963        0.034        0.181            0       
+>      1
+Class: Small busin~s        14963        0.095        0.294            0       
+>      1
+Class: Technical (~i        14963        0.091        0.288            0       
+>      1
+Class: Production ~s        14963        0.134        0.341            0       
+>      1
+Class: (Associate)~s        14963        0.195        0.396            0       
+>      1
+Class: Clerks               14963        0.105        0.307            0       
+>      1
+Class: Socio-cultu~o        14963        0.165        0.371            0       
+>      1
+Class: Service wor~s        14963        0.145        0.352            0       
+>      1
+Class: Never Worke~a        14963        0.035        0.184            0       
+>      1
+-------------------------------------------------------------------------------
+> ------
+
+. 
+. restore
+
+. 
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A3. Bivariate Correlation Matrix of Key Independent Variables
+. * -------------------------------------------------------------------------
+. estpost correlate male_pol_lead trad_bwnorm gay_father econ_diff ///
+>     if estimation_sample == 1, matrix listwise
+
+             |      e(b)     e(rho)       e(p)   e(count) 
+-------------+--------------------------------------------
+male_pol_l~d |                                            
+male_pol_l~d |         1          1                 14963 
+ trad_bwnorm |  .2750946   .2750946   5.2e-258      14963 
+  gay_father |  .2686835   .2686835   9.1e-246      14963 
+   econ_diff |  .0842488   .0842488   5.54e-25      14963 
+trad_bwnorm  |                                            
+ trad_bwnorm |         1          1                 14963 
+  gay_father |  .5310935   .5310935          0      14963 
+   econ_diff |  .2593602   .2593602   1.5e-228      14963 
+gay_father   |                                            
+  gay_father |         1          1                 14963 
+   econ_diff |  .1979965   .1979965   3.9e-132      14963 
+econ_diff    |                                            
+   econ_diff |         1          1                 14963 
+
+. 
+. esttab ., ///
+>     unstack not noobs nomtitle nonumber compress ///
+>     title("Table A3. Bivariate Correlation Matrix of Key Independent Variable
+> s")
+
+Table A3. Bivariate Correlation Matrix of Key Independent Variables
+--------------------------------------------------------------
+           male_po~d    trad_bw~m    gay_fat~r    econ_diff   
+--------------------------------------------------------------
+male_pol~d         1                                          
+trad_bwn~m     0.275***         1                             
+gay_father     0.269***     0.531***         1                
+econ_diff     0.0842***     0.259***     0.198***         1   
+--------------------------------------------------------------
+* p<0.05, ** p<0.01, *** p<0.001
+
+. 
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A4. Variance Inflation Factors (VIF)
+. * -------------------------------------------------------------------------
+. * Run using standard OLS, as VIF is a property of the X-matrix only
+. regress rr_vote i.male c.male_pol_lead c.trad_bwnorm c.gay_father c.econ_diff
+>  ///
+>     c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work ///
+>     if estimation_sample == 1
+
+      Source |       SS           df       MS      Number of obs   =    14,963
+-------------+----------------------------------   F(19, 14943)    =     77.15
+       Model |  187.154242        19  9.85022324   Prob > F        =    0.0000
+    Residual |  1907.77565    14,943   .12767019   R-squared       =    0.0893
+-------------+----------------------------------   Adj R-squared   =    0.0882
+       Total |  2094.92989    14,962  .140016702   Root MSE        =    .35731
+
+------------------------------------------------------------------------------
+     rr_vote | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |    .005443   .0064326     0.85   0.397    -.0071657    .0180518
+male_pol_l~d |   .0046775   .0051835     0.90   0.367    -.0054828    .0148379
+ trad_bwnorm |   .0239947   .0029628     8.10   0.000     .0181872    .0298023
+  gay_father |   .0355077    .002556    13.89   0.000     .0304976    .0405178
+   econ_diff |   .0001458   .0029507     0.05   0.961    -.0056379    .0059294
+         age |  -.0014226   .0002314    -6.15   0.000    -.0018762   -.0009691
+             |
+   educ_3cat |
+Medium Ed..  |   -.116159   .0102705   -11.31   0.000    -.1362904   -.0960277
+High Educ..  |  -.1864735   .0114635   -16.27   0.000    -.2089433   -.1640037
+             |
+oesch8_class |
+Small bus..  |   .0013487   .0187578     0.07   0.943    -.0354189    .0381162
+Technical..  |  -.0438343   .0186357    -2.35   0.019    -.0803626    -.007306
+Productio..  |  -.0005348   .0185713    -0.03   0.977    -.0369368    .0358671
+(Associat..  |  -.0420023   .0172151    -2.44   0.015    -.0757461   -.0082585
+     Clerks  |  -.0177877   .0186714    -0.95   0.341     -.054386    .0188105
+Socio-cul..  |  -.0403003   .0175999    -2.29   0.022    -.0747983   -.0058023
+Service w..  |  -.0291493   .0183511    -1.59   0.112    -.0651197    .0068211
+Never Wor..  |  -.0463608   .0240155    -1.93   0.054    -.0934342    .0007125
+             |
+     1.urban |  -.0436329   .0061427    -7.10   0.000    -.0556733   -.0315925
+relig_attend |   .0005245   .0016578     0.32   0.752     -.002725     .003774
+   1.in_work |   .0148954    .007873     1.89   0.059    -.0005366    .0303274
+       _cons |   .2510496    .030766     8.16   0.000     .1907445    .3113547
+------------------------------------------------------------------------------
+
+. 
+. display ""
+
+
+. display "*****************************************************"
+*****************************************************
+
+. display "--- TABLE A4. VARIANCE INFLATION FACTORS (VIF) ---"
+--- TABLE A4. VARIANCE INFLATION FACTORS (VIF) ---
+
+. display "*****************************************************"
+*****************************************************
+
+. estat vif
+
+    Variable |       VIF       1/VIF  
+-------------+----------------------
+      1.male |      1.21    0.827376
+male_pol_l~d |      1.12    0.892490
+ trad_bwnorm |      1.59    0.630892
+  gay_father |      1.60    0.623519
+   econ_diff |      1.17    0.856965
+         age |      1.71    0.583658
+   educ_3cat |
+          2  |      3.02    0.331506
+          3  |      3.83    0.260855
+oesch8_class |
+          2  |      3.56    0.281257
+          3  |      3.37    0.296939
+          4  |      4.70    0.212924
+          5  |      5.45    0.183446
+          6  |      3.85    0.259726
+          7  |      5.01    0.199664
+          8  |      4.89    0.204652
+          9  |      2.29    0.436976
+     1.urban |      1.04    0.961243
+relig_attend |      1.22    0.822890
+   1.in_work |      1.70    0.587504
+-------------+----------------------
+    Mean VIF |      2.75
+
+. display "Note: All VIF values below the conventional threshold of 10 -- no pr
+> oblematic multicollinearity."
+Note: All VIF values below the conventional threshold of 10 -- no problematic m
+> ulticollinearity.
+
+. display "*****************************************************"
+*****************************************************
+
+. 
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A5. Null Model and Intraclass Correlation Coefficient
+. * -------------------------------------------------------------------------
+. display ""
+
+
+. display "*****************************************************"
+*****************************************************
+
+. display "--- TABLE A5. NULL MODEL AND INTRACLASS CORRELATION COEFFICIENT (ICC
+> ) ---"
+--- TABLE A5. NULL MODEL AND INTRACLASS CORRELATION COEFFICIENT (ICC) ---
+
+. display "*****************************************************"
+*****************************************************
+
+. melogit rr_vote if estimation_sample == 1 || country:
+
+Fitting fixed-effects model:
+
+Iteration 0:  Log likelihood = -6782.3582  
+Iteration 1:  Log likelihood = -6782.0996  
+Iteration 2:  Log likelihood = -6782.0996  
+
+Refining starting values:
+
+Grid node 0:  Log likelihood = -5789.3956
+
+Fitting full model:
+
+Iteration 0:  Log likelihood = -5789.3956  
+Iteration 1:  Log likelihood = -5787.7469  
+Iteration 2:  Log likelihood = -5787.4978  
+Iteration 3:  Log likelihood = -5787.4964  
+Iteration 4:  Log likelihood = -5787.4964  
+
+Mixed-effects logistic regression               Number of obs     =     14,963
+Group variable: country                         Number of groups  =         20
+
+                                                Obs per group:
+                                                              min =        427
+                                                              avg =      748.1
+                                                              max =      1,420
+
+Integration method: mvaghermite                 Integration pts.  =          7
+
+                                                Wald chi2(0)      =          .
+Log likelihood = -5787.4964                     Prob > chi2       =          .
+------------------------------------------------------------------------------
+     rr_vote | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -1.952947   .2717062    -7.19   0.000    -2.485481   -1.420412
+-------------+----------------------------------------------------------------
+country      |
+   var(_cons)|   1.454495   .4776156                      .7641903    2.768364
+------------------------------------------------------------------------------
+LR test vs. logistic model: chibar2(01) = 1989.21     Prob >= chibar2 = 0.0000
+
+. estat icc
+
+Intraclass correlation
+
+------------------------------------------------------------------------------
+                       Level |        ICC   Std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+                     country |   .3065733   .0698073      .1885001     .456959
+------------------------------------------------------------------------------
+
+. display "Note: Empty two-level random-intercept logistic model."
+Note: Empty two-level random-intercept logistic model.
+
+. display "*****************************************************"
+*****************************************************
+
+. 
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A6. Comparing Interaction Effects across Domains of Male Leadership
+. * -------------------------------------------------------------------------
+. * Tests whether the gendered radicalization effect is specific to demand for
+. * male POLITICAL authority (the state) or generalizes to male authority in
+. * the economic (market) and academic (university) spheres. (Identical model
+. * specification to the "Specificity of the Political Sphere" section of
+. * 02_Data_Analysis.do -- re-estimated here for single-source
+. * reproducibility of the appendix.)
+. 
+. melogit rr_vote i.male##c.male_pol_lead ///
+>     c.trad_bwnorm c.gay_father c.econ_diff ///
+>     c.age##c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work 
+> ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Fitting fixed-effects model:
+
+Iteration 0:  Log likelihood = -6194.0697  
+Iteration 1:  Log likelihood = -6115.3794  
+Iteration 2:  Log likelihood =  -6115.015  
+Iteration 3:  Log likelihood = -6115.0149  
+
+Refining starting values:
+
+Grid node 0:  Log likelihood = -5322.7865
+
+Fitting full model:
+
+Iteration 0:  Log pseudolikelihood = -5322.7865  
+Iteration 1:  Log pseudolikelihood = -5265.1466  
+Iteration 2:  Log pseudolikelihood = -5264.5765  
+Iteration 3:  Log pseudolikelihood = -5264.5565  
+Iteration 4:  Log pseudolikelihood = -5264.5564  
+
+Mixed-effects logistic regression               Number of obs     =     14,963
+Group variable: country                         Number of groups  =         20
+
+                                                Obs per group:
+                                                              min =        427
+                                                              avg =      748.1
+                                                              max =      1,420
+
+Integration method: mvaghermite                 Integration pts.  =          7
+
+                                                Wald chi2(19)     =          .
+Log pseudolikelihood = -5264.5564               Prob > chi2       =          .
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |  -.6074326   .2936808    -2.07   0.039    -1.183036   -.0318289
+male_pol_l~d |   .0088863   .0946497     0.09   0.925    -.1766238    .1943964
+             |
+        male#|
+          c. |
+male_pol_l~d |
+          1  |   .2217034     .09446     2.35   0.019     .0365653    .4068415
+             |
+ trad_bwnorm |   .2069735    .042941     4.82   0.000     .1228108    .2911362
+  gay_father |   .3449104   .0452078     7.63   0.000     .2563046    .4335161
+   econ_diff |   .1351461   .0405893     3.33   0.001     .0555926    .2146996
+         age |   .0240234   .0178104     1.35   0.177    -.0108844    .0589311
+             |
+ c.age#c.age |  -.0003867   .0001629    -2.37   0.018     -.000706   -.0000674
+             |
+   educ_3cat |
+Medium Ed..  |  -.3664932   .1205554    -3.04   0.002    -.6027775   -.1302089
+High Educ..  |  -.8969112   .1485117    -6.04   0.000    -1.187989   -.6058337
+             |
+oesch8_class |
+Small bus..  |  -.1074485   .2013232    -0.53   0.594    -.5020347    .2871378
+Technical..  |  -.3743699   .1353525    -2.77   0.006    -.6396559   -.1090839
+Productio..  |  -.0063377   .1872992    -0.03   0.973    -.3734374     .360762
+(Associat..  |  -.4073067   .1475166    -2.76   0.006     -.696434   -.1181795
+     Clerks  |  -.1057598   .1619174    -0.65   0.514     -.423112    .2115924
+Socio-cul..  |  -.4671314   .1742222    -2.68   0.007    -.8086006   -.1256622
+Service w..  |  -.0923271   .1705727    -0.54   0.588    -.4266435    .2419892
+Never Wor..  |  -.2603333   .2338579    -1.11   0.266    -.7186863    .1980197
+             |
+     1.urban |  -.2277207   .0525796    -4.33   0.000    -.3307748   -.1246667
+relig_attend |   .0090508   .0617463     0.15   0.883    -.1119697    .1300714
+   1.in_work |  -.0026806   .0548666    -0.05   0.961    -.1102173     .104856
+       _cons |  -3.269843   .6576219    -4.97   0.000    -4.558758   -1.980928
+-------------+----------------------------------------------------------------
+country      |
+   var(_cons)|   1.711114   .6060698                      .8546471    3.425872
+------------------------------------------------------------------------------
+
+. estimates store m_int_pol
+
+. 
+. melogit rr_vote i.male##c.male_econ_lead ///
+>     c.trad_bwnorm c.gay_father c.econ_diff ///
+>     c.age##c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work 
+> ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Fitting fixed-effects model:
+
+Iteration 0:  Log likelihood = -6175.4913  
+Iteration 1:  Log likelihood = -6096.1555  
+Iteration 2:  Log likelihood =  -6095.783  
+Iteration 3:  Log likelihood =  -6095.783  
+
+Refining starting values:
+
+Grid node 0:  Log likelihood =  -5310.845
+
+Fitting full model:
+
+Iteration 0:  Log pseudolikelihood =  -5310.845  
+Iteration 1:  Log pseudolikelihood = -5258.9593  
+Iteration 2:  Log pseudolikelihood = -5258.4355  
+Iteration 3:  Log pseudolikelihood = -5258.4187  
+Iteration 4:  Log pseudolikelihood = -5258.4187  
+
+Mixed-effects logistic regression               Number of obs     =     14,917
+Group variable: country                         Number of groups  =         20
+
+                                                Obs per group:
+                                                              min =        425
+                                                              avg =      745.9
+                                                              max =      1,418
+
+Integration method: mvaghermite                 Integration pts.  =          7
+
+                                                Wald chi2(19)     =          .
+Log pseudolikelihood = -5258.4187               Prob > chi2       =          .
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |   -.085657   .2628126    -0.33   0.744    -.6007603    .4294463
+male_econ_~d |  -.0034981   .0743431    -0.05   0.962    -.1492078    .1422117
+             |
+        male#|
+          c. |
+male_econ_~d |
+          1  |    .057147   .0866869     0.66   0.510    -.1127561    .2270502
+             |
+ trad_bwnorm |   .2129132   .0413081     5.15   0.000     .1319507    .2938756
+  gay_father |   .3522667   .0444611     7.92   0.000     .2651245    .4394089
+   econ_diff |   .1365946   .0400953     3.41   0.001     .0580093    .2151799
+         age |   .0230991   .0178374     1.29   0.195    -.0118616    .0580597
+             |
+ c.age#c.age |  -.0003796   .0001641    -2.31   0.021    -.0007013   -.0000579
+             |
+   educ_3cat |
+Medium Ed..  |  -.3733111   .1198076    -3.12   0.002    -.6081296   -.1384925
+High Educ..  |  -.9035904   .1484318    -6.09   0.000    -1.194511   -.6126694
+             |
+oesch8_class |
+Small bus..  |  -.0997744   .2019951    -0.49   0.621    -.4956775    .2961287
+Technical..  |   -.381126   .1393376    -2.74   0.006    -.6542227   -.1080294
+Productio..  |   .0056661    .184456     0.03   0.975    -.3558611    .3671933
+(Associat..  |  -.4102892   .1483141    -2.77   0.006    -.7009795    -.119599
+     Clerks  |  -.1005794   .1596087    -0.63   0.529    -.4134067    .2122479
+Socio-cul..  |  -.4628494   .1746178    -2.65   0.008     -.805094   -.1206049
+Service w..  |  -.0878214   .1728898    -0.51   0.611    -.4266792    .2510364
+Never Wor..  |  -.2569284   .2338526    -1.10   0.272     -.715271    .2014143
+             |
+     1.urban |  -.2289979   .0519552    -4.41   0.000    -.3308283   -.1271675
+relig_attend |   .0092076   .0611679     0.15   0.880    -.1106792    .1290944
+   1.in_work |  -.0016086    .055335    -0.03   0.977    -.1100631     .106846
+       _cons |  -3.233842   .5037646    -6.42   0.000    -4.221203   -2.246482
+-------------+----------------------------------------------------------------
+country      |
+   var(_cons)|   1.676141   .5972388                      .8337051    3.369836
+------------------------------------------------------------------------------
+
+. estimates store m_int_econ
+
+. 
+. melogit rr_vote i.male##c.male_acad_lead ///
+>     c.trad_bwnorm c.gay_father c.econ_diff ///
+>     c.age##c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work 
+> ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Fitting fixed-effects model:
+
+Iteration 0:  Log likelihood =  -6141.372  
+Iteration 1:  Log likelihood = -6061.6588  
+Iteration 2:  Log likelihood = -6061.2782  
+Iteration 3:  Log likelihood = -6061.2782  
+
+Refining starting values:
+
+Grid node 0:  Log likelihood = -5283.4283
+
+Fitting full model:
+
+Iteration 0:  Log pseudolikelihood = -5283.4283  
+Iteration 1:  Log pseudolikelihood = -5232.1251  
+Iteration 2:  Log pseudolikelihood =  -5231.611  
+Iteration 3:  Log pseudolikelihood = -5231.5948  
+Iteration 4:  Log pseudolikelihood = -5231.5948  
+
+Mixed-effects logistic regression               Number of obs     =     14,852
+Group variable: country                         Number of groups  =         20
+
+                                                Obs per group:
+                                                              min =        425
+                                                              avg =      742.6
+                                                              max =      1,414
+
+Integration method: mvaghermite                 Integration pts.  =          7
+
+                                                Wald chi2(19)     =          .
+Log pseudolikelihood = -5231.5948               Prob > chi2       =          .
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |  -.1146652   .2717538    -0.42   0.673     -.647293    .4179625
+male_acad_~d |  -.0314149    .080205    -0.39   0.695    -.1886138    .1257839
+             |
+        male#|
+          c. |
+male_acad_~d |
+          1  |   .0722431   .0850121     0.85   0.395    -.0943775    .2388637
+             |
+ trad_bwnorm |   .2148682   .0412907     5.20   0.000     .1339399    .2957965
+  gay_father |   .3548091   .0461388     7.69   0.000     .2643788    .4452395
+   econ_diff |   .1384029   .0414661     3.34   0.001     .0571308    .2196749
+         age |   .0231622   .0178074     1.30   0.193    -.0117397     .058064
+             |
+ c.age#c.age |  -.0003827   .0001638    -2.34   0.019    -.0007038   -.0000616
+             |
+   educ_3cat |
+Medium Ed..  |  -.3792337   .1225104    -3.10   0.002    -.6193496   -.1391178
+High Educ..  |  -.9045196   .1485795    -6.09   0.000     -1.19573   -.6133091
+             |
+oesch8_class |
+Small bus..  |  -.0888467   .2008244    -0.44   0.658    -.4824552    .3047619
+Technical..  |  -.3737208   .1356811    -2.75   0.006    -.6396508   -.1077908
+Productio..  |  -.0022626   .1865512    -0.01   0.990    -.3678961     .363371
+(Associat..  |  -.4067867   .1476295    -2.76   0.006    -.6961351   -.1174382
+     Clerks  |  -.0856085   .1553959    -0.55   0.582    -.3901789    .2189618
+Socio-cul..  |  -.4646032   .1685058    -2.76   0.006    -.7948685   -.1343379
+Service w..  |  -.0904661   .1699985    -0.53   0.595    -.4236571    .2427249
+Never Wor..  |  -.2451526    .226339    -1.08   0.279    -.6887689    .1984636
+             |
+     1.urban |  -.2278386    .052916    -4.31   0.000     -.331552   -.1241252
+relig_attend |   .0100503   .0612926     0.16   0.870    -.1100809    .1301816
+   1.in_work |  -.0082691   .0549163    -0.15   0.880    -.1159031    .0993648
+       _cons |  -3.162821    .562153    -5.63   0.000    -4.264621   -2.061021
+-------------+----------------------------------------------------------------
+country      |
+   var(_cons)|   1.669766   .5942816                      .8312029    3.354319
+------------------------------------------------------------------------------
+
+. estimates store m_int_acad
+
+. 
+. esttab m_int_pol m_int_econ m_int_acad, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N N_g ll, labels("Observations" "Number of Countries" "Log Likeliho
+> od") fmt(0 0 2)) ///
+>     label nobaselevels ///
+>     mtitles("Political (State)" "Economic (Market)" "Academic (Univ.)") ///
+>     varlabels(1.male "Male" ///
+>               male_pol_lead "Pref. Male Pol. Leadership" ///
+>               male_econ_lead "Pref. Male Econ. Leadership" ///
+>               male_acad_lead "Pref. Male Academ. Leadership" ///
+>               1.male#c.male_pol_lead "Male x Pref. Male Pol. Leadership" ///
+>               1.male#c.male_econ_lead "Male x Male Econ. Leadership" ///
+>               1.male#c.male_acad_lead "Male x Male Academ. Leadership" ///
+>               trad_bwnorm "Breadwinner Norm" ///
+>               gay_father "Rejects Same-Sex Fathers" ///
+>               econ_diff "Economic Precarity") ///
+>     title("Table A6. Comparing Interaction Effects across Domains of Male Lea
+> dership") ///
+>     addnotes("Note: Multilevel logistic regression models (log-odds). Coeffic
+> ients are log-odds from two-level random-intercept logistic models with robus
+> t standard errors. * p<0.05, ** p<0.01, *** p<0.001.")
+
+Table A6. Comparing Interaction Effects across Domains of Male Leadership
+--------------------------------------------------------------------
+                              (1)             (2)             (3)   
+                     Political ~)    Economic (~)        Acade..)   
+                             b/se            b/se            b/se   
+--------------------------------------------------------------------
+Voted for a Populi~g                                                
+Male                       -0.607*         -0.086          -0.115   
+                          (0.294)         (0.263)         (0.272)   
+Pref. Male Pol. Le~p        0.009                                   
+                          (0.095)                                   
+Male x Pref. Male ~p        0.222*                                  
+                          (0.094)                                   
+Breadwinner Norm            0.207***        0.213***        0.215***
+                          (0.043)         (0.041)         (0.041)   
+Rejects Same-Sex F~s        0.345***        0.352***        0.355***
+                          (0.045)         (0.044)         (0.046)   
+Economic Precarity          0.135***        0.137***        0.138***
+                          (0.041)         (0.040)         (0.041)   
+Age of Respondent ~)        0.024           0.023           0.023   
+                          (0.018)         (0.018)         (0.018)   
+Age of Respondent ~        -0.000*         -0.000*         -0.000*  
+                          (0.000)         (0.000)         (0.000)   
+Medium Education           -0.366**        -0.373**        -0.379** 
+                          (0.121)         (0.120)         (0.123)   
+High Education             -0.897***       -0.904***       -0.905***
+                          (0.149)         (0.148)         (0.149)   
+Small business own~s       -0.107          -0.100          -0.089   
+                          (0.201)         (0.202)         (0.201)   
+Technical (semi-)p~s       -0.374**        -0.381**        -0.374** 
+                          (0.135)         (0.139)         (0.136)   
+Production workers         -0.006           0.006          -0.002   
+                          (0.187)         (0.184)         (0.187)   
+(Associate) managers       -0.407**        -0.410**        -0.407** 
+                          (0.148)         (0.148)         (0.148)   
+Clerks                     -0.106          -0.101          -0.086   
+                          (0.162)         (0.160)         (0.155)   
+Socio-cultural (se~n       -0.467**        -0.463**        -0.465** 
+                          (0.174)         (0.175)         (0.169)   
+Service workers            -0.092          -0.088          -0.090   
+                          (0.171)         (0.173)         (0.170)   
+Never Worked / Out~r       -0.260          -0.257          -0.245   
+                          (0.234)         (0.234)         (0.226)   
+Lives in Urban Are~b       -0.228***       -0.229***       -0.228***
+                          (0.053)         (0.052)         (0.053)   
+Religious Attendan~e        0.009           0.009           0.010   
+                          (0.062)         (0.061)         (0.061)   
+Currently in Paid ~1       -0.003          -0.002          -0.008   
+                          (0.055)         (0.055)         (0.055)   
+Pref. Male Econ. L~p                       -0.003                   
+                                          (0.074)                   
+Male x Male E.. Le~p                        0.057                   
+                                          (0.087)                   
+Pref. Male Academ.~p                                       -0.031   
+                                                          (0.080)   
+Male x Male A.. Le~p                                        0.072   
+                                                          (0.085)   
+_cons                      -3.270***       -3.234***       -3.163***
+                          (0.658)         (0.504)         (0.562)   
+--------------------------------------------------------------------
+/                                                                   
+var(_cons[country])         1.711**         1.676**         1.670** 
+                          (0.606)         (0.597)         (0.594)   
+--------------------------------------------------------------------
+Observations                14963           14917           14852   
+Number of Countries                                                 
+Log Likelihood           -5264.56        -5258.42        -5231.59   
+--------------------------------------------------------------------
+Note: Multilevel logistic regression models (log-odds). Coefficients are log-od
+> ds from two-level random-intercept logistic models with robust standard error
+> s. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * TABLE A7. Multilevel Linear Probability Models
+. * TABLES A8-A10. Multilevel LPM Triple Interactions by Oesch Class
+. *****************************************************************************
+> ***
+. estimates clear
+
+. 
+. * Model 1: Raw Gender Gap
+. mixed rr_vote i.male ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -5262.9914  
+Iteration 1:  Log pseudolikelihood = -5262.9914  
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(1)     =  30.34
+Log pseudolikelihood = -5262.9914                    Prob > chi2      = 0.0000
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |   .0384274   .0069765     5.51   0.000     .0247537    .0521012
+       _cons |   .1577361   .0395702     3.99   0.000       .08018    .2352922
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |    .027503   .0113876      .0122163    .0619183
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1175079   .0144991      .0922654    .1496564
+------------------------------------------------------------------------------
+
+. estimates store lpm_m1
+
+. 
+. * Model 2: Structural Controls
+. mixed rr_vote i.male ///
+>     c.age##c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work 
+> c.econ_diff ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -4979.5656  
+Iteration 1:  Log pseudolikelihood = -4979.5656  (backed up)
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(17)    = 355.19
+Log pseudolikelihood = -4979.5656                    Prob > chi2      = 0.0000
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |   .0350493   .0062322     5.62   0.000     .0228345    .0472642
+         age |    .003036   .0019324     1.57   0.116    -.0007513    .0068234
+             |
+ c.age#c.age |  -.0000406   .0000186    -2.19   0.029     -.000077   -4.19e-06
+             |
+   educ_3cat |
+Medium Ed..  |   -.079582    .026166    -3.04   0.002    -.1308664   -.0282976
+High Educ..  |  -.1366203   .0310873    -4.39   0.000    -.1975503   -.0756903
+             |
+oesch8_class |
+Small bus..  |   .0044107   .0219324     0.20   0.841    -.0385759    .0473973
+Technical..  |  -.0412265    .014839    -2.78   0.005    -.0703103   -.0121427
+Productio..  |   .0195791   .0223591     0.88   0.381    -.0242439    .0634021
+(Associat..  |  -.0408394   .0149455    -2.73   0.006    -.0701321   -.0115468
+     Clerks  |  -.0098389   .0151645    -0.65   0.516    -.0395607    .0198829
+Socio-cul..  |  -.0469322   .0164353    -2.86   0.004    -.0791449   -.0147195
+Service w..  |  -.0055462    .018158    -0.31   0.760    -.0411352    .0300428
+Never Wor..  |  -.0194613   .0245111    -0.79   0.427    -.0675022    .0285796
+             |
+     1.urban |   -.025947   .0072154    -3.60   0.000    -.0400889   -.0118052
+relig_attend |   .0100493   .0085203     1.18   0.238    -.0066502    .0267488
+   1.in_work |   .0023297    .006697     0.35   0.728    -.0107962    .0154557
+   econ_diff |   .0180967   .0047222     3.83   0.000     .0088413    .0273521
+       _cons |   .1651683   .0574373     2.88   0.004     .0525932    .2777433
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |   .0231585   .0093746      .0104747    .0512008
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1131597   .0133614      .0897812    .1426258
+------------------------------------------------------------------------------
+
+. estimates store lpm_m2
+
+. 
+. * Model 3: Full Patriarchal Model
+. mixed rr_vote i.male ///
+>     c.age##c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work 
+> c.econ_diff ///
+>     c.gay_father c.trad_bwnorm c.male_pol_lead ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -4726.9251  
+Iteration 1:  Log pseudolikelihood = -4726.9251  
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(19)    =      .
+Log pseudolikelihood = -4726.9251                    Prob > chi2      =      .
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |   .0039695   .0070811     0.56   0.575    -.0099092    .0178482
+         age |   .0030813   .0020021     1.54   0.124    -.0008428    .0070054
+             |
+ c.age#c.age |   -.000048   .0000187    -2.56   0.010    -.0000847   -.0000113
+             |
+   educ_3cat |
+Medium Ed..  |  -.0659755   .0241565    -2.73   0.006    -.1133214   -.0186296
+High Educ..  |  -.1154053   .0278809    -4.14   0.000    -.1700508   -.0607598
+             |
+oesch8_class |
+Small bus..  |  -.0031991   .0208169    -0.15   0.878    -.0439994    .0376013
+Technical..  |  -.0374151   .0136061    -2.75   0.006    -.0640826   -.0107476
+Productio..  |   .0117169   .0210433     0.56   0.578    -.0295271     .052961
+(Associat..  |  -.0370498    .013518    -2.74   0.006    -.0635446   -.0105549
+     Clerks  |  -.0103912   .0155307    -0.67   0.503    -.0408308    .0200483
+Socio-cul..  |  -.0401126   .0150653    -2.66   0.008      -.06964   -.0105852
+Service w..  |   -.007394   .0172442    -0.43   0.668     -.041192     .026404
+Never Wor..  |  -.0242861   .0253586    -0.96   0.338     -.073988    .0254157
+             |
+     1.urban |  -.0195996   .0065731    -2.98   0.003    -.0324826   -.0067166
+relig_attend |   .0009234   .0076034     0.12   0.903     -.013979    .0158258
+   1.in_work |   .0006484   .0061184     0.11   0.916    -.0113436    .0126403
+   econ_diff |   .0136987   .0043474     3.15   0.002      .005178    .0222194
+  gay_father |   .0413603   .0074627     5.54   0.000     .0267337     .055987
+ trad_bwnorm |   .0292537   .0071345     4.10   0.000     .0152704     .043237
+male_pol_l~d |   .0170677   .0100637     1.70   0.090    -.0026568    .0367921
+       _cons |   -.011868    .061116    -0.19   0.846    -.1316531    .1079172
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |   .0235627   .0075208      .0126048    .0440466
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1093948   .0125241      .0874071    .1369137
+------------------------------------------------------------------------------
+
+. estimates store lpm_m3
+
+. 
+. * Model 4: Strongman Interaction
+. mixed rr_vote i.male##c.male_pol_lead ///
+>     c.trad_bwnorm c.gay_father c.econ_diff ///
+>     c.age##c.age i.educ_3cat i.oesch8_class i.urban c.relig_attend i.in_work 
+> ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -4721.6213  
+Iteration 1:  Log pseudolikelihood = -4721.6213  
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(19)    =      .
+Log pseudolikelihood = -4721.6213                    Prob > chi2      =      .
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |  -.0887316   .0330939    -2.68   0.007    -.1535945   -.0238687
+male_pol_l~d |   .0023968    .011979     0.20   0.841    -.0210817    .0258753
+             |
+        male#|
+          c. |
+male_pol_l~d |
+          1  |   .0301198   .0107843     2.79   0.005     .0089829    .0512567
+             |
+ trad_bwnorm |   .0290138     .00719     4.04   0.000     .0149216     .043106
+  gay_father |   .0411101   .0074662     5.51   0.000     .0264766    .0557436
+   econ_diff |   .0134611   .0043957     3.06   0.002     .0048457    .0220765
+         age |   .0031216   .0019987     1.56   0.118    -.0007957    .0070389
+             |
+ c.age#c.age |  -.0000482   .0000187    -2.58   0.010    -.0000848   -.0000115
+             |
+   educ_3cat |
+Medium Ed..  |  -.0663184   .0241965    -2.74   0.006    -.1137427    -.018894
+High Educ..  |   -.115958   .0278177    -4.17   0.000    -.1704797   -.0614362
+             |
+oesch8_class |
+Small bus..  |  -.0044731   .0209153    -0.21   0.831    -.0454663    .0365201
+Technical..  |  -.0378939     .01358    -2.79   0.005    -.0645103   -.0112776
+Productio..  |    .009868   .0211575     0.47   0.641    -.0315999    .0513359
+(Associat..  |  -.0377761   .0134964    -2.80   0.005    -.0642286   -.0113235
+     Clerks  |  -.0109545   .0155635    -0.70   0.482    -.0414585    .0195495
+Socio-cul..  |  -.0410866   .0151254    -2.72   0.007    -.0707317   -.0114414
+Service w..  |  -.0085509   .0172203    -0.50   0.619     -.042302    .0252002
+Never Wor..  |  -.0244883   .0255394    -0.96   0.338    -.0745445     .025568
+             |
+     1.urban |  -.0197097    .006595    -2.99   0.003    -.0326356   -.0067838
+relig_attend |   .0011611   .0076161     0.15   0.879    -.0137661    .0160883
+   1.in_work |   .0006607   .0061129     0.11   0.914    -.0113203    .0126417
+       _cons |   .0328993    .069227     0.48   0.635    -.1027831    .1685816
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |   .0236847   .0075538      .0126763    .0442532
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1093164   .0125241      .0873304    .1368377
+------------------------------------------------------------------------------
+
+. estimates store lpm_m4
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A7. Multilevel Linear Probability Models
+. * -------------------------------------------------------------------------
+. esttab lpm_m1 lpm_m2 lpm_m3 lpm_m4, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N N_g, labels("Observations" "Countries") fmt(0 0)) ///
+>     label nobaselevels ///
+>     mtitles("Model 1" "Model 2" "Model 3" "Model 4") ///
+>     varlabels(1.male "Male" ///
+>               1.male#c.male_pol_lead "Male x Male Leadership" ///
+>               male_pol_lead "Preference for Male Leadership" ///
+>               trad_bwnorm "Breadwinner Norm" ///
+>               gay_father "Rejects Same-Sex Fathers" ///
+>               econ_diff "Economic Precarity") ///
+>     title("Table A7. Multilevel Linear Probability Models") ///
+>     addnotes("Note: Coefficients represent linear changes in probability of v
+> oting for a PRR party. Multilevel linear probability models with random inter
+> cepts for country and robust standard errors. * p<0.05, ** p<0.01, *** p<0.00
+> 1.")
+
+Table A7. Multilevel Linear Probability Models
+-------------------------------------------------------------------------------
+> -----
+                              (1)             (2)             (3)             (
+> 4)   
+                          Model 1         Model 2         Model 3         Model
+>  4   
+                             b/se            b/se            b/se            b/
+> se   
+-------------------------------------------------------------------------------
+> -----
+Voted for a Populi~g                                                           
+>      
+Male                        0.038***        0.035***        0.004          -0.0
+> 89** 
+                          (0.007)         (0.006)         (0.007)         (0.03
+> 3)   
+Age of Respondent ~)                        0.003           0.003           0.0
+> 03   
+                                          (0.002)         (0.002)         (0.00
+> 2)   
+Age of Respondent ~                        -0.000*         -0.000*         -0.0
+> 00** 
+                                          (0.000)         (0.000)         (0.00
+> 0)   
+Medium Education                           -0.080**        -0.066**        -0.0
+> 66** 
+                                          (0.026)         (0.024)         (0.02
+> 4)   
+High Education                             -0.137***       -0.115***       -0.1
+> 16***
+                                          (0.031)         (0.028)         (0.02
+> 8)   
+Small business own~s                        0.004          -0.003          -0.0
+> 04   
+                                          (0.022)         (0.021)         (0.02
+> 1)   
+Technical (semi-)p~s                       -0.041**        -0.037**        -0.0
+> 38** 
+                                          (0.015)         (0.014)         (0.01
+> 4)   
+Production workers                          0.020           0.012           0.0
+> 10   
+                                          (0.022)         (0.021)         (0.02
+> 1)   
+(Associate) managers                       -0.041**        -0.037**        -0.0
+> 38** 
+                                          (0.015)         (0.014)         (0.01
+> 3)   
+Clerks                                     -0.010          -0.010          -0.0
+> 11   
+                                          (0.015)         (0.016)         (0.01
+> 6)   
+Socio-cultural (se~n                       -0.047**        -0.040**        -0.0
+> 41** 
+                                          (0.016)         (0.015)         (0.01
+> 5)   
+Service workers                            -0.006          -0.007          -0.0
+> 09   
+                                          (0.018)         (0.017)         (0.01
+> 7)   
+Never Worked / Out~r                       -0.019          -0.024          -0.0
+> 24   
+                                          (0.025)         (0.025)         (0.02
+> 6)   
+Lives in Urban Are~b                       -0.026***       -0.020**        -0.0
+> 20** 
+                                          (0.007)         (0.007)         (0.00
+> 7)   
+Religious Attendan~e                        0.010           0.001           0.0
+> 01   
+                                          (0.009)         (0.008)         (0.00
+> 8)   
+Currently in Paid ~1                        0.002           0.001           0.0
+> 01   
+                                          (0.007)         (0.006)         (0.00
+> 6)   
+Economic Precarity                          0.018***        0.014**         0.0
+> 13** 
+                                          (0.005)         (0.004)         (0.00
+> 4)   
+Rejects Same-Sex F~s                                        0.041***        0.0
+> 41***
+                                                          (0.007)         (0.00
+> 7)   
+Breadwinner Norm                                            0.029***        0.0
+> 29***
+                                                          (0.007)         (0.00
+> 7)   
+Preference for Mal~p                                        0.017           0.0
+> 02   
+                                                          (0.010)         (0.01
+> 2)   
+Male x Male Leader~p                                                        0.0
+> 30** 
+                                                                          (0.01
+> 1)   
+_cons                       0.158***        0.165**        -0.012           0.0
+> 33   
+                          (0.040)         (0.057)         (0.061)         (0.06
+> 9)   
+-------------------------------------------------------------------------------
+> -----
+lns1_1_1                                                                       
+>      
+_cons                      -1.797***       -1.883***       -1.874***       -1.8
+> 71***
+                          (0.207)         (0.202)         (0.160)         (0.15
+> 9)   
+-------------------------------------------------------------------------------
+> -----
+lnsig_e                                                                        
+>      
+_cons                      -1.071***       -1.089***       -1.106***       -1.1
+> 07***
+                          (0.062)         (0.059)         (0.057)         (0.05
+> 7)   
+-------------------------------------------------------------------------------
+> -----
+Observations                14963           14963           14963           149
+> 63   
+Countries                                                                      
+>      
+-------------------------------------------------------------------------------
+> -----
+Note: Coefficients represent linear changes in probability of voting for a PRR 
+> party. Multilevel linear probability models with random intercepts for countr
+> y and robust standard errors. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. * Model 5: Triple Interaction (Gender x Strongman x Oesch Class)
+. mixed rr_vote i.male##c.male_pol_lead##i.oesch8_class ///
+>     c.trad_bwnorm c.gay_father c.econ_diff ///
+>     c.age##c.age i.educ_3cat i.urban c.relig_attend i.in_work ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -4696.7193  
+Iteration 1:  Log pseudolikelihood = -4696.7193  
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(19)    =      .
+Log pseudolikelihood = -4696.7193                    Prob > chi2      =      .
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |   .1512435   .1300358     1.16   0.245     -.103622     .406109
+male_pol_l~d |   .0870723   .0351446     2.48   0.013     .0181901    .1559545
+             |
+        male#|
+          c. |
+male_pol_l~d |
+          1  |   -.046401   .0472601    -0.98   0.326    -.1390292    .0462271
+             |
+oesch8_class |
+Small bus..  |   .1285806   .1117042     1.15   0.250    -.0903555    .3475167
+Technical..  |   .4030865   .1333821     3.02   0.003     .1416625    .6645105
+Productio..  |   .3339051   .1093813     3.05   0.002     .1195218    .5482885
+(Associat..  |   .2330484   .1095626     2.13   0.033     .0183096    .4477871
+     Clerks  |   .2387141   .1246956     1.91   0.056    -.0056847    .4831129
+Socio-cul..  |   .1505829   .1242422     1.21   0.226    -.0929274    .3940932
+Service w..  |   .3193778   .1089951     2.93   0.003     .1057513    .5330043
+Never Wor..  |   .1607201   .1207585     1.33   0.183    -.0759623    .3974025
+             |
+        male#|
+oesch8_class |
+          1 #|
+Small bus..  |  -.2122444   .1658294    -1.28   0.201     -.537264    .1127752
+          1 #|
+Technical..  |  -.3672456   .2065375    -1.78   0.075    -.7720517    .0375606
+          1 #|
+Productio..  |  -.1474253   .1441504    -1.02   0.306    -.4299549    .1351043
+          1 #|
+(Associat..  |  -.3164776   .1295006    -2.44   0.015    -.5702941    -.062661
+   1#Clerks  |  -.3066921   .1971257    -1.56   0.120    -.6930514    .0796672
+          1 #|
+Socio-cul..  |  -.1364825    .166025    -0.82   0.411    -.4618856    .1889205
+          1 #|
+Service w..  |  -.4148246   .1618891    -2.56   0.010    -.7321215   -.0975277
+          1 #|
+Never Wor..  |  -.2662893   .1781926    -1.49   0.135    -.6155403    .0829617
+             |
+oesch8_class#|
+          c. |
+male_pol_l~d |
+Small bus..  |  -.0428096   .0408057    -1.05   0.294    -.1227873     .037168
+Technical..  |  -.1494127   .0470253    -3.18   0.001    -.2415806   -.0572448
+Productio..  |  -.1053807   .0408341    -2.58   0.010     -.185414   -.0253473
+(Associat..  |  -.0852319   .0397291    -2.15   0.032    -.1630996   -.0073642
+     Clerks  |  -.0826242   .0446306    -1.85   0.064    -.1700986    .0048502
+Socio-cul..  |  -.0605248   .0439448    -1.38   0.168    -.1466551    .0256055
+Service w..  |  -.1071195   .0406174    -2.64   0.008    -.1867281    -.027511
+Never Wor..  |  -.0649504   .0451973    -1.44   0.151    -.1535354    .0236346
+             |
+        male#|
+oesch8_class#|
+          c. |
+male_pol_l~d |
+          1 #|
+Small bus..  |   .0657552   .0603306     1.09   0.276    -.0524905     .184001
+          1 #|
+Technical..  |   .1258426   .0714044     1.76   0.078    -.0141074    .2657926
+          1 #|
+Productio..  |   .0498803   .0515544     0.97   0.333    -.0511644     .150925
+          1 #|
+(Associat..  |   .0960199   .0464935     2.07   0.039     .0048944    .1871454
+   1#Clerks  |   .1028975   .0682238     1.51   0.131    -.0308188    .2366137
+          1 #|
+Socio-cul..  |   .0385113   .0597584     0.64   0.519     -.078613    .1556356
+          1 #|
+Service w..  |   .1322928   .0550694     2.40   0.016     .0243588    .2402268
+          1 #|
+Never Wor..  |    .096284   .0610095     1.58   0.115    -.0232924    .2158604
+             |
+ trad_bwnorm |   .0290156   .0071535     4.06   0.000      .014995    .0430363
+  gay_father |   .0411893   .0074948     5.50   0.000     .0264997    .0558788
+   econ_diff |   .0134219   .0044029     3.05   0.002     .0047924    .0220514
+         age |   .0031827   .0019934     1.60   0.110    -.0007243    .0070897
+             |
+ c.age#c.age |  -.0000486   .0000186    -2.62   0.009     -.000085   -.0000122
+             |
+   educ_3cat |
+Medium Ed..  |  -.0660589   .0241951    -2.73   0.006    -.1134804   -.0186374
+High Educ..  |  -.1152056   .0274778    -4.19   0.000    -.1690611   -.0613501
+             |
+     1.urban |  -.0200975   .0063475    -3.17   0.002    -.0325385   -.0076566
+relig_attend |   .0011382   .0076364     0.15   0.882    -.0138288    .0161052
+   1.in_work |  -.0004372   .0057526    -0.08   0.939    -.0117121    .0108376
+       _cons |  -.2293288   .1254817    -1.83   0.068    -.4752685    .0166109
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |   .0235924   .0075555      .0125943    .0441949
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1089533   .0124744       .087053    .1363631
+------------------------------------------------------------------------------
+
+. estimates store lpm_m5
+
+. 
+. * Model 6: Triple Interaction (Gender x Breadwinner Norms x Oesch Class)
+. mixed rr_vote i.male##c.trad_bwnorm##i.oesch8_class ///
+>     c.gay_father c.econ_diff c.male_pol_lead ///
+>     c.age##c.age i.educ_3cat i.urban c.relig_attend i.in_work ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -4702.5709  
+Iteration 1:  Log pseudolikelihood = -4702.5709  (backed up)
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(19)    =      .
+Log pseudolikelihood = -4702.5709                    Prob > chi2      =      .
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |    .019383   .0550576     0.35   0.725     -.088528    .1272939
+ trad_bwnorm |   .0593637   .0237499     2.50   0.012     .0128147    .1059127
+             |
+        male#|
+          c. |
+ trad_bwnorm |
+          1  |  -.0071325   .0330276    -0.22   0.829    -.0718654    .0576004
+             |
+oesch8_class |
+Small bus..  |   .0595864   .0439362     1.36   0.175    -.0265271    .1456998
+Technical..  |    .047514   .0431198     1.10   0.271    -.0369993    .1320273
+Productio..  |   .0803656   .0603063     1.33   0.183    -.0378326    .1985639
+(Associat..  |  -.0048185   .0340343    -0.14   0.887    -.0715245    .0618875
+     Clerks  |   .0518006   .0396637     1.31   0.192    -.0259388    .1295401
+Socio-cul..  |   .0033469   .0372375     0.09   0.928    -.0696372     .076331
+Service w..  |   .0683837    .047449     1.44   0.150    -.0246146     .161382
+Never Wor..  |  -.0215422   .0572393    -0.38   0.707    -.1337292    .0906449
+             |
+        male#|
+oesch8_class |
+          1 #|
+Small bus..  |   -.027921   .0537917    -0.52   0.604    -.1333509    .0775089
+          1 #|
+Technical..  |  -.0503323   .0590455    -0.85   0.394    -.1660593    .0653947
+          1 #|
+Productio..  |   .0473147   .0645483     0.73   0.464    -.0791975     .173827
+          1 #|
+(Associat..  |  -.0100676   .0612056    -0.16   0.869    -.1300284    .1098933
+   1#Clerks  |  -.0082702   .0618499    -0.13   0.894    -.1294937    .1129534
+          1 #|
+Socio-cul..  |  -.0471985   .0604682    -0.78   0.435     -.165714     .071317
+          1 #|
+Service w..  |  -.0376857   .0642165    -0.59   0.557    -.1635478    .0881764
+          1 #|
+Never Wor..  |   .0051471    .086716     0.06   0.953    -.1648131    .1751074
+             |
+oesch8_class#|
+          c. |
+ trad_bwnorm |
+Small bus..  |  -.0336317   .0263232    -1.28   0.201    -.0852242    .0179608
+Technical..  |  -.0552943   .0279659    -1.98   0.048    -.1101064   -.0004821
+Productio..  |  -.0358128   .0290953    -1.23   0.218    -.0928386     .021213
+(Associat..  |  -.0088419    .025617    -0.35   0.730    -.0590504    .0413666
+     Clerks  |  -.0353937   .0277731    -1.27   0.203     -.089828    .0190405
+Socio-cul..  |  -.0196922   .0235586    -0.84   0.403    -.0658662    .0264817
+Service w..  |  -.0386119   .0264031    -1.46   0.144    -.0903611    .0131373
+Never Wor..  |  -.0145194   .0266157    -0.55   0.585    -.0666852    .0376464
+             |
+        male#|
+oesch8_class#|
+          c. |
+ trad_bwnorm |
+          1 #|
+Small bus..  |   .0138132   .0345329     0.40   0.689    -.0538701    .0814965
+          1 #|
+Technical..  |   .0382513   .0381576     1.00   0.316    -.0365363    .1130389
+          1 #|
+Productio..  |   -.014314   .0325623    -0.44   0.660    -.0781349     .049507
+          1 #|
+(Associat..  |  -.0086751   .0406732    -0.21   0.831     -.088393    .0710429
+   1#Clerks  |     .01291   .0382932     0.34   0.736    -.0621434    .0879633
+          1 #|
+Socio-cul..  |   .0167431   .0385617     0.43   0.664    -.0588365    .0923226
+          1 #|
+Service w..  |     .01751   .0372376     0.47   0.638    -.0554743    .0904943
+          1 #|
+Never Wor..  |   .0183823   .0461105     0.40   0.690    -.0719926    .1087573
+             |
+  gay_father |   .0407462   .0075341     5.41   0.000     .0259795    .0555129
+   econ_diff |   .0133953   .0041455     3.23   0.001     .0052702    .0215204
+male_pol_l~d |   .0179497   .0098629     1.82   0.069    -.0013813    .0372806
+         age |   .0030675    .002018     1.52   0.129    -.0008878    .0070228
+             |
+ c.age#c.age |  -.0000477   .0000188    -2.54   0.011    -.0000845   -.0000108
+             |
+   educ_3cat |
+Medium Ed..  |  -.0680729   .0242401    -2.81   0.005    -.1155827   -.0205632
+High Educ..  |  -.1161983   .0278122    -4.18   0.000    -.1707092   -.0616874
+             |
+     1.urban |  -.0190306   .0061194    -3.11   0.002    -.0310243   -.0070368
+relig_attend |    .001037   .0075892     0.14   0.891    -.0138375    .0159115
+   1.in_work |  -.0003176   .0058944    -0.05   0.957    -.0118705    .0112353
+       _cons |  -.0679313   .0693053    -0.98   0.327    -.2037673    .0679047
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |    .023754   .0076556      .0126301    .0446752
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1090376   .0124549      .0871661    .1363972
+------------------------------------------------------------------------------
+
+. estimates store lpm_m6
+
+. 
+. * Model 7: Triple Interaction (Gender x Anti-Gay Father x Oesch Class)
+. mixed rr_vote i.male##c.gay_father##i.oesch8_class ///
+>     c.trad_bwnorm c.male_pol_lead c.econ_diff ///
+>     c.age##c.age i.educ_3cat i.urban c.relig_attend i.in_work ///
+>     if estimation_sample == 1 || country:, vce(robust)
+
+Performing EM optimization ...
+
+Performing gradient-based optimization: 
+Iteration 0:  Log pseudolikelihood = -4700.3151  
+Iteration 1:  Log pseudolikelihood = -4700.3151  (backed up)
+
+Computing standard errors ...
+
+Mixed-effects regression                             Number of obs    = 14,963
+Group variable: country                              Number of groups =     20
+                                                     Obs per group:
+                                                                  min =    427
+                                                                  avg =  748.1
+                                                                  max =  1,420
+                                                     Wald chi2(19)    =      .
+Log pseudolikelihood = -4700.3151                    Prob > chi2      =      .
+
+                               (Std. err. adjusted for 20 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+     rr_vote | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |   .0292249   .0461657     0.63   0.527    -.0612583    .1197081
+  gay_father |   .0718393   .0189059     3.80   0.000     .0347844    .1088942
+             |
+        male#|
+c.gay_father |
+          1  |  -.0096844   .0178963    -0.54   0.588    -.0447605    .0253918
+             |
+oesch8_class |
+Small bus..  |   .0798139   .0475246     1.68   0.093    -.0133327    .1729604
+Technical..  |   .0596141   .0522132     1.14   0.254     -.042722    .1619502
+Productio..  |   .1257036   .0612441     2.05   0.040     .0056674    .2457398
+(Associat..  |   .0398585     .04774     0.83   0.404    -.0537102    .1334273
+     Clerks  |   .0834639   .0385661     2.16   0.030     .0078757    .1590521
+Socio-cul..  |   .0371676   .0443312     0.84   0.402    -.0497199     .124055
+Service w..  |   .1158923   .0492184     2.35   0.019     .0194259    .2123587
+Never Wor..  |  -.0395413   .0594135    -0.67   0.506    -.1559897    .0769071
+             |
+        male#|
+oesch8_class |
+          1 #|
+Small bus..  |  -.0410097   .0540662    -0.76   0.448    -.1469775    .0649581
+          1 #|
+Technical..  |  -.0585574   .0609546    -0.96   0.337    -.1780263    .0609114
+          1 #|
+Productio..  |   .0046368   .0717447     0.06   0.948    -.1359802    .1452539
+          1 #|
+(Associat..  |  -.0478198   .0503657    -0.95   0.342    -.1465348    .0508952
+   1#Clerks  |   -.016389   .0501772    -0.33   0.744    -.1147345    .0819564
+          1 #|
+Socio-cul..  |  -.0513527   .0524261    -0.98   0.327     -.154106    .0514006
+          1 #|
+Service w..  |  -.1248349   .0544591    -2.29   0.022    -.2315726   -.0180971
+          1 #|
+Never Wor..  |  -.0100545   .0649327    -0.15   0.877    -.1373204    .1172113
+             |
+oesch8_class#|
+c.gay_father |
+Small bus..  |  -.0327045   .0155615    -2.10   0.036    -.0632045   -.0022044
+Technical..  |   -.045008   .0214255    -2.10   0.036    -.0870013   -.0030147
+Productio..  |  -.0427335   .0214127    -2.00   0.046    -.0847015   -.0007654
+(Associat..  |  -.0253682   .0193206    -1.31   0.189    -.0632357    .0124994
+     Clerks  |  -.0384246   .0148735    -2.58   0.010    -.0675761   -.0092731
+Socio-cul..  |  -.0282955   .0149556    -1.89   0.058     -.057608     .001017
+Service w..  |  -.0474534   .0179656    -2.64   0.008    -.0826652   -.0122415
+Never Wor..  |  -.0010267     .02298    -0.04   0.964    -.0460668    .0440133
+             |
+        male#|
+oesch8_class#|
+c.gay_father |
+          1 #|
+Small bus..  |   .0158161   .0180016     0.88   0.380    -.0194664    .0510986
+          1 #|
+Technical..  |   .0317895   .0250174     1.27   0.204    -.0172437    .0808227
+          1 #|
+Productio..  |   .0022856   .0252274     0.09   0.928    -.0471592    .0517304
+          1 #|
+(Associat..  |    .010263   .0205118     0.50   0.617    -.0299395    .0504654
+   1#Clerks  |   .0140977   .0196048     0.72   0.472     -.024327    .0525224
+          1 #|
+Socio-cul..  |    .014759   .0210764     0.70   0.484    -.0265501    .0560681
+          1 #|
+Service w..  |   .0441718   .0205301     2.15   0.031     .0039335    .0844101
+          1 #|
+Never Wor..  |   .0184159   .0306569     0.60   0.548    -.0416706    .0785024
+             |
+ trad_bwnorm |   .0288359   .0072033     4.00   0.000     .0147177    .0429541
+male_pol_l~d |   .0171782   .0098133     1.75   0.080    -.0020555    .0364119
+   econ_diff |   .0134666   .0042357     3.18   0.001     .0051647    .0217685
+         age |   .0030194   .0020742     1.46   0.145     -.001046    .0070848
+             |
+ c.age#c.age |  -.0000477   .0000193    -2.47   0.013    -.0000855   -9.88e-06
+             |
+   educ_3cat |
+Medium Ed..  |  -.0663969   .0239614    -2.77   0.006    -.1133604   -.0194335
+High Educ..  |  -.1151961   .0274731    -4.19   0.000    -.1690425   -.0613498
+             |
+     1.urban |   -.019412   .0063035    -3.08   0.002    -.0317667   -.0070573
+relig_attend |   .0009643   .0075745     0.13   0.899    -.0138814    .0158101
+   1.in_work |   -.001044    .006079    -0.17   0.864    -.0129586    .0108707
+       _cons |  -.0859366   .0743451    -1.16   0.248    -.2316503    .0597771
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                             |               Robust           
+  Random-effects parameters  |   Estimate   std. err.     [95% conf. interval]
+-----------------------------+------------------------------------------------
+country: Identity            |
+                  var(_cons) |   .0235669   .0076051      .0125204    .0443596
+-----------------------------+------------------------------------------------
+               var(Residual) |   .1090059   .0124414      .0871562    .1363332
+------------------------------------------------------------------------------
+
+. estimates store lpm_m7
+
+. 
+. *****************************************************************************
+> ***
+. * TABLES A8-A10: Triple Interactions (One Standalone Table per Dimension)
+. * Note: full model output shown (all controls included), unlike the trimmed
+. * row-subset used for the Word appendix -- retained here for completeness
+. * and single-source verifiability; trim rows when building the final table.
+. *****************************************************************************
+> ***
+. 
+. esttab lpm_m5, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N, labels("Observations") fmt(0)) ///
+>     label nobaselevels ///
+>     title("Table A8. Multilevel LPM Triple Interaction: Gender x Male Politic
+> al Leadership x Oesch Class") ///
+>     addnotes("Note: Multilevel LPM with random intercepts for country and rob
+> ust standard errors. * p<0.05, ** p<0.01, *** p<0.001.")
+
+Table A8. Multilevel LPM Triple Interaction: Gender x Male Political Leadership
+>  x Oesch Class
+------------------------------------
+                              (1)   
+                     Voted for ~g   
+                             b/se   
+------------------------------------
+Voted for a Populi~g                
+Male Respondent (D~1        0.151   
+                          (0.130)   
+Prefers Male Polit~i        0.087*  
+                          (0.035)   
+Male Respondent (D~f       -0.046   
+                          (0.047)   
+Small business own~s        0.129   
+                          (0.112)   
+Technical (semi-)p~s        0.403** 
+                          (0.133)   
+Production workers          0.334** 
+                          (0.109)   
+(Associate) managers        0.233*  
+                          (0.110)   
+Clerks                      0.239   
+                          (0.125)   
+Socio-cultural (se~n        0.151   
+                          (0.124)   
+Service workers             0.319** 
+                          (0.109)   
+Never Worked / Out~r        0.161   
+                          (0.121)   
+Male Respondent (D~l       -0.212   
+                          (0.166)   
+Male Respondent (D~h       -0.367   
+                          (0.207)   
+Male Respondent (D~d       -0.147   
+                          (0.144)   
+Male Respondent (D~s       -0.316*  
+                          (0.130)   
+Male Respondent (D~r       -0.307   
+                          (0.197)   
+Male Respondent (D~i       -0.136   
+                          (0.166)   
+Male Respondent (D~v       -0.415*  
+                          (0.162)   
+Male Respondent (D~e       -0.266   
+                          (0.178)   
+Small business own~        -0.043   
+                          (0.041)   
+Technical (semi-)p~#       -0.149** 
+                          (0.047)   
+Production workers~l       -0.105** 
+                          (0.041)   
+(Associate) manage~M       -0.085*  
+                          (0.040)   
+Clerks # Prefers M~        -0.083   
+                          (0.045)   
+Socio-cultural (se~n       -0.061   
+                          (0.044)   
+Service workers # ~P       -0.107** 
+                          (0.041)   
+Never Worked / Out~r       -0.065   
+                          (0.045)   
+Male Respondent (D~l        0.066   
+                          (0.060)   
+Male Respondent (D~h        0.126   
+                          (0.071)   
+Male Respondent (D~d        0.050   
+                          (0.052)   
+Male Respondent (D~s        0.096*  
+                          (0.046)   
+Male Respondent (D~r        0.103   
+                          (0.068)   
+Male Respondent (D~i        0.039   
+                          (0.060)   
+Male Respondent (D~v        0.132*  
+                          (0.055)   
+Male Respondent (D~e        0.096   
+                          (0.061)   
+Men should earn, W~e        0.029***
+                          (0.007)   
+Same-sex male coup~c        0.041***
+                          (0.007)   
+Difficulty making ~g        0.013** 
+                          (0.004)   
+Age of Respondent ~)        0.003   
+                          (0.002)   
+Age of Respondent ~        -0.000** 
+                          (0.000)   
+Medium Education           -0.066** 
+                          (0.024)   
+High Education             -0.115***
+                          (0.027)   
+Lives in Urban Are~b       -0.020** 
+                          (0.006)   
+Religious Attendan~e        0.001   
+                          (0.008)   
+Currently in Paid ~1       -0.000   
+                          (0.006)   
+Constant                   -0.229   
+                          (0.125)   
+------------------------------------
+lns1_1_1                            
+Constant                   -1.873***
+                          (0.160)   
+------------------------------------
+lnsig_e                             
+Constant                   -1.108***
+                          (0.057)   
+------------------------------------
+Observations                14963   
+------------------------------------
+Note: Multilevel LPM with random intercepts for country and robust standard err
+> ors. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. esttab lpm_m6, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N, labels("Observations") fmt(0)) ///
+>     label nobaselevels ///
+>     title("Table A9. Multilevel LPM Triple Interaction: Gender x Breadwinner 
+> Norm x Oesch Class") ///
+>     addnotes("Note: Multilevel LPM with random intercepts for country and rob
+> ust standard errors. * p<0.05, ** p<0.01, *** p<0.001.")
+
+Table A9. Multilevel LPM Triple Interaction: Gender x Breadwinner Norm x Oesch 
+> Class
+------------------------------------
+                              (1)   
+                     Voted for ~g   
+                             b/se   
+------------------------------------
+Voted for a Populi~g                
+Male Respondent (D~1        0.019   
+                          (0.055)   
+Men should earn, W~e        0.059*  
+                          (0.024)   
+Male Respondent (D~        -0.007   
+                          (0.033)   
+Small business own~s        0.060   
+                          (0.044)   
+Technical (semi-)p~s        0.048   
+                          (0.043)   
+Production workers          0.080   
+                          (0.060)   
+(Associate) managers       -0.005   
+                          (0.034)   
+Clerks                      0.052   
+                          (0.040)   
+Socio-cultural (se~n        0.003   
+                          (0.037)   
+Service workers             0.068   
+                          (0.047)   
+Never Worked / Out~r       -0.022   
+                          (0.057)   
+Male Respondent (D~l       -0.028   
+                          (0.054)   
+Male Respondent (D~h       -0.050   
+                          (0.059)   
+Male Respondent (D~d        0.047   
+                          (0.065)   
+Male Respondent (D~s       -0.010   
+                          (0.061)   
+Male Respondent (D~r       -0.008   
+                          (0.062)   
+Male Respondent (D~i       -0.047   
+                          (0.060)   
+Male Respondent (D~v       -0.038   
+                          (0.064)   
+Male Respondent (D~e        0.005   
+                          (0.087)   
+Small business own~u       -0.034   
+                          (0.026)   
+Technical (semi-)p~#       -0.055*  
+                          (0.028)   
+Production workers~        -0.036   
+                          (0.029)   
+(Associate) manage~l       -0.009   
+                          (0.026)   
+Clerks # Men shoul~        -0.035   
+                          (0.028)   
+Socio-cultural (se~n       -0.020   
+                          (0.024)   
+Service workers # ~r       -0.039   
+                          (0.026)   
+Never Worked / Out~r       -0.015   
+                          (0.027)   
+Male Respondent (D~l        0.014   
+                          (0.035)   
+Male Respondent (D~h        0.038   
+                          (0.038)   
+Male Respondent (D~d       -0.014   
+                          (0.033)   
+Male Respondent (D~s       -0.009   
+                          (0.041)   
+Male Respondent (D~r        0.013   
+                          (0.038)   
+Male Respondent (D~i        0.017   
+                          (0.039)   
+Male Respondent (D~v        0.018   
+                          (0.037)   
+Male Respondent (D~e        0.018   
+                          (0.046)   
+Same-sex male coup~c        0.041***
+                          (0.008)   
+Difficulty making ~g        0.013** 
+                          (0.004)   
+Prefers Male Polit~i        0.018   
+                          (0.010)   
+Age of Respondent ~)        0.003   
+                          (0.002)   
+Age of Respondent ~        -0.000*  
+                          (0.000)   
+Medium Education           -0.068** 
+                          (0.024)   
+High Education             -0.116***
+                          (0.028)   
+Lives in Urban Are~b       -0.019** 
+                          (0.006)   
+Religious Attendan~e        0.001   
+                          (0.008)   
+Currently in Paid ~1       -0.000   
+                          (0.006)   
+Constant                   -0.068   
+                          (0.069)   
+------------------------------------
+lns1_1_1                            
+Constant                   -1.870***
+                          (0.161)   
+------------------------------------
+lnsig_e                             
+Constant                   -1.108***
+                          (0.057)   
+------------------------------------
+Observations                14963   
+------------------------------------
+Note: Multilevel LPM with random intercepts for country and robust standard err
+> ors. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. esttab lpm_m7, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N, labels("Observations") fmt(0)) ///
+>     label nobaselevels ///
+>     title("Table A10. Multilevel LPM Triple Interaction: Gender x Rejects Sam
+> e-Sex Fathers x Oesch Class") ///
+>     addnotes("Note: Multilevel LPM with random intercepts for country and rob
+> ust standard errors. * p<0.05, ** p<0.01, *** p<0.001.")
+
+Table A10. Multilevel LPM Triple Interaction: Gender x Rejects Same-Sex Fathers
+>  x Oesch Class
+------------------------------------
+                              (1)   
+                     Voted for ~g   
+                             b/se   
+------------------------------------
+Voted for a Populi~g                
+Male Respondent (D~1        0.029   
+                          (0.046)   
+Same-sex male coup~c        0.072***
+                          (0.019)   
+Male Respondent (D~e       -0.010   
+                          (0.018)   
+Small business own~s        0.080   
+                          (0.048)   
+Technical (semi-)p~s        0.060   
+                          (0.052)   
+Production workers          0.126*  
+                          (0.061)   
+(Associate) managers        0.040   
+                          (0.048)   
+Clerks                      0.083*  
+                          (0.039)   
+Socio-cultural (se~n        0.037   
+                          (0.044)   
+Service workers             0.116*  
+                          (0.049)   
+Never Worked / Out~r       -0.040   
+                          (0.059)   
+Male Respondent (D~l       -0.041   
+                          (0.054)   
+Male Respondent (D~h       -0.059   
+                          (0.061)   
+Male Respondent (D~d        0.005   
+                          (0.072)   
+Male Respondent (D~s       -0.048   
+                          (0.050)   
+Male Respondent (D~r       -0.016   
+                          (0.050)   
+Male Respondent (D~i       -0.051   
+                          (0.052)   
+Male Respondent (D~v       -0.125*  
+                          (0.054)   
+Male Respondent (D~e       -0.010   
+                          (0.065)   
+Small business own~x       -0.033*  
+                          (0.016)   
+Technical (semi-)p~#       -0.045*  
+                          (0.021)   
+Production workers~a       -0.043*  
+                          (0.021)   
+(Associate) manage~        -0.025   
+                          (0.019)   
+Clerks # Same-sex ~a       -0.038** 
+                          (0.015)   
+Socio-cultural (se~n       -0.028   
+                          (0.015)   
+Service workers # ~        -0.047** 
+                          (0.018)   
+Never Worked / Out~r       -0.001   
+                          (0.023)   
+Male Respondent (D~l        0.016   
+                          (0.018)   
+Male Respondent (D~h        0.032   
+                          (0.025)   
+Male Respondent (D~d        0.002   
+                          (0.025)   
+Male Respondent (D~s        0.010   
+                          (0.021)   
+Male Respondent (D~r        0.014   
+                          (0.020)   
+Male Respondent (D~i        0.015   
+                          (0.021)   
+Male Respondent (D~v        0.044*  
+                          (0.021)   
+Male Respondent (D~e        0.018   
+                          (0.031)   
+Men should earn, W~e        0.029***
+                          (0.007)   
+Prefers Male Polit~i        0.017   
+                          (0.010)   
+Difficulty making ~g        0.013** 
+                          (0.004)   
+Age of Respondent ~)        0.003   
+                          (0.002)   
+Age of Respondent ~        -0.000*  
+                          (0.000)   
+Medium Education           -0.066** 
+                          (0.024)   
+High Education             -0.115***
+                          (0.027)   
+Lives in Urban Are~b       -0.019** 
+                          (0.006)   
+Religious Attendan~e        0.001   
+                          (0.008)   
+Currently in Paid ~1       -0.001   
+                          (0.006)   
+Constant                   -0.086   
+                          (0.074)   
+------------------------------------
+lns1_1_1                            
+Constant                   -1.874***
+                          (0.161)   
+------------------------------------
+lnsig_e                             
+Constant                   -1.108***
+                          (0.057)   
+------------------------------------
+Observations                14963   
+------------------------------------
+Note: Multilevel LPM with random intercepts for country and robust standard err
+> ors. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * TABLE A11. Analytic Sample vs. Excluded Non-Voters (Balance Check)
+. * TABLE A12. Categorical Variables by Group (Column % and chi2)
+. * TABLE A13. Predictors of Non-Voter Exclusion (Joint Selection Model)
+. *****************************************************************************
+> ***
+. * Rationale: rr_vote models PRR support conditional on voting, following
+. * standard practice of separating the turnout decision from the party-choice
+. * decision. This section checks whether respondents excluded for having no
+. * valid vote-choice response (non-voters / vote-item non-response) differ
+. * systematically from the final analytic sample on the paper's core variables
+> .
+. * Iceland is not part of this comparison: it has no PRR party coded at all
+. * (a structural scope decision, not a non-response issue).
+. 
+. capture drop nonvoter_group
+
+. gen nonvoter_group = .
+(28,963 missing values generated)
+
+. replace nonvoter_group = 0 if estimation_sample == 1
+(14,963 real changes made)
+
+. replace nonvoter_group = 1 if missing(rr_vote) & prr_available == 1
+(9,994 real changes made)
+
+. 
+. label define nvg_lbl 0 "Included (Analytic Sample)" 1 "Excluded (Non-Voter / 
+> Missing Vote Item)"
+
+. label values nonvoter_group nvg_lbl
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A11: Balance Table (Included vs. Excluded Non-Voters)
+. * -------------------------------------------------------------------------
+. estpost ttest male age relig_attend in_work econ_diff male_pol_lead trad_bwno
+> rm gay_father ///
+>     if !missing(nonvoter_group), by(nonvoter_group) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t) 
+-------------+-------------------------------------------------------
+        male |  .0443668      24935   .0064193   6.911503   21496.85 
+         age |  5.338983      24842   .2230141   23.94012    20172.5 
+relig_attend | -.1102785      24398   .0261237  -4.221395   19506.87 
+     in_work |  .0106355      24676   .0063284   1.680609   20659.61 
+   econ_diff | -.3326824      24499   .0135936  -24.47343   21054.99 
+male_pol_l~d | -.0189097      24456   .0082608  -2.289101   18926.69 
+ trad_bwnorm | -.2828838      24733   .0163698  -17.28079   20542.63 
+  gay_father | -.2528087      24324   .0189479  -13.34228   20029.76 
+
+             |    e(p_l)       e(p)     e(p_u)     e(N_1)    e(mu_1) 
+-------------+-------------------------------------------------------
+        male |         1   4.93e-12   2.46e-12      14963   .4721647 
+         age |         1   6.5e-125   3.2e-125      14963   53.03308 
+relig_attend |  .0000122   .0000244   .9999878      14963   2.783733 
+     in_work |   .953573   .0928541    .046427      14963   .6252757 
+   econ_diff |  9.4e-131   1.9e-130          1      14963    2.67707 
+male_pol_l~d |  .0110422   .0220845   .9889578      14963   3.080532 
+ trad_bwnorm |  9.69e-67   1.94e-66          1      14963    2.04598 
+  gay_father |  9.78e-41   1.96e-40          1      14963   2.666644 
+
+             |    e(N_2)    e(mu_2) 
+-------------+----------------------
+        male |      9972   .4277978 
+         age |      9879    47.6941 
+relig_attend |      9435   2.894012 
+     in_work |      9713   .6146402 
+   econ_diff |      9536   3.009753 
+male_pol_l~d |      9493   3.099442 
+ trad_bwnorm |      9770   2.328864 
+  gay_father |      9361   2.919453 
+
+. 
+. esttab ., ///
+>     cells("mu_1(fmt(3) label(Included)) mu_2(fmt(3) label(Excluded)) b(fmt(3)
+>  label(Diff)) se(fmt(3) label(SE)) t(fmt(2) label(t)) p(fmt(3) label(p-value)
+> )") ///
+>     noobs label ///
+>     title("Table A11. Analytic Sample vs. Excluded Non-Voters") ///
+>     addnotes("Note: Welch (unequal-variance) t-tests. Excluded = missing rr_v
+> ote in countries with a PRR party option.")
+
+Table A11. Analytic Sample vs. Excluded Non-Voters
+-------------------------------------------------------------------------------
+> -------------------
+                              (1)                                              
+>                    
+                                                                               
+>                    
+                         Included     Excluded         Diff           SE       
+>      t      p-value
+-------------------------------------------------------------------------------
+> -------------------
+Male Respondent (D~)        0.472        0.428        0.044        0.006       
+>   6.91        0.000
+Age of Respondent ~)       53.033       47.694        5.339        0.223       
+>  23.94        0.000
+Religious Attendan~e        2.784        2.894       -0.110        0.026       
+>  -4.22        0.000
+Currently in Paid ~)        0.625        0.615        0.011        0.006       
+>   1.68        0.093
+Difficulty making ~g        2.677        3.010       -0.333        0.014       
+> -24.47        0.000
+Prefers Male Polit~i        3.081        3.099       -0.019        0.008       
+>  -2.29        0.022
+Men should earn, W~e        2.046        2.329       -0.283        0.016       
+> -17.28        0.000
+Same-sex male coup~c        2.667        2.919       -0.253        0.019       
+> -13.34        0.000
+-------------------------------------------------------------------------------
+> -------------------
+Note: Welch (unequal-variance) t-tests. Excluded = missing rr_vote in countries
+>  with a PRR party option.
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A12: Categorical Variables by Group (chi2)
+. * -------------------------------------------------------------------------
+. display ""
+
+
+. display "*****************************************************"
+*****************************************************
+
+. display "--- TABLE A12. CATEGORICAL VARIABLES BY GROUP (COLUMN % AND CHI2) --
+> -"
+--- TABLE A12. CATEGORICAL VARIABLES BY GROUP (COLUMN % AND CHI2) ---
+
+. display "*****************************************************"
+*****************************************************
+
+. tab educ_3cat nonvoter_group if !missing(nonvoter_group), col chi2
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+Highest Level of |
+    Education (3 |    nonvoter_group
+     Categories) | Included   Excluded  |     Total
+-----------------+----------------------+----------
+   Low Education |     1,653      1,749 |     3,402 
+                 |     11.05      18.17 |     13.83 
+-----------------+----------------------+----------
+Medium Education |     6,323      4,665 |    10,988 
+                 |     42.26      48.46 |     44.68 
+-----------------+----------------------+----------
+  High Education |     6,987      3,213 |    10,200 
+                 |     46.70      33.37 |     41.48 
+-----------------+----------------------+----------
+           Total |    14,963      9,627 |    24,590 
+                 |    100.00     100.00 |    100.00 
+
+          Pearson chi2(2) = 515.6431   Pr = 0.000
+
+. tab urban nonvoter_group if !missing(nonvoter_group), col chi2
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+  Lives in |
+Urban Area |
+(City/Subu |    nonvoter_group
+      rbs) | Included   Excluded  |     Total
+-----------+----------------------+----------
+         0 |     9,299      6,167 |    15,466 
+           |     62.15      63.52 |     62.69 
+-----------+----------------------+----------
+         1 |     5,664      3,542 |     9,206 
+           |     37.85      36.48 |     37.31 
+-----------+----------------------+----------
+     Total |    14,963      9,709 |    24,672 
+           |    100.00     100.00 |    100.00 
+
+          Pearson chi2(1) =   4.7370   Pr = 0.030
+
+. tab oesch8_class nonvoter_group if !missing(nonvoter_group), col chi2
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+    class Oesch class |    nonvoter_group
+ position - 8 classes | Included   Excluded  |     Total
+----------------------+----------------------+----------
+Self-employed profess |       510        203 |       713 
+                      |      3.41       2.28 |      2.99 
+----------------------+----------------------+----------
+Small business owners |     1,426        773 |     2,199 
+                      |      9.53       8.68 |      9.21 
+----------------------+----------------------+----------
+Technical (semi-)prof |     1,362        611 |     1,973 
+                      |      9.10       6.86 |      8.26 
+----------------------+----------------------+----------
+   Production workers |     2,008      1,558 |     3,566 
+                      |     13.42      17.49 |     14.94 
+----------------------+----------------------+----------
+ (Associate) managers |     2,917      1,096 |     4,013 
+                      |     19.49      12.30 |     16.81 
+----------------------+----------------------+----------
+               Clerks |     1,576        993 |     2,569 
+                      |     10.53      11.15 |     10.76 
+----------------------+----------------------+----------
+Socio-cultural (semi- |     2,473      1,027 |     3,500 
+                      |     16.53      11.53 |     14.66 
+----------------------+----------------------+----------
+      Service workers |     2,166      1,849 |     4,015 
+                      |     14.48      20.75 |     16.82 
+----------------------+----------------------+----------
+Never Worked / Outsid |       525        799 |     1,324 
+                      |      3.51       8.97 |      5.55 
+----------------------+----------------------+----------
+                Total |    14,963      8,909 |    23,872 
+                      |    100.00     100.00 |    100.00 
+
+          Pearson chi2(8) = 824.2069   Pr = 0.000
+
+. display "*****************************************************"
+*****************************************************
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A13: Joint Selection Model (What Independently Predicts Exclusion?)
+. * -------------------------------------------------------------------------
+. logit nonvoter_group i.male c.age##c.age i.educ_3cat i.urban c.relig_attend i
+> .in_work ///
+>     c.econ_diff i.oesch8_class c.male_pol_lead c.trad_bwnorm c.gay_father i.c
+> ountry ///
+>     if !missing(nonvoter_group), vce(robust)
+
+Iteration 0:  Log pseudolikelihood = -14133.223  
+Iteration 1:  Log pseudolikelihood = -12638.961  
+Iteration 2:  Log pseudolikelihood = -12594.971  
+Iteration 3:  Log pseudolikelihood = -12594.767  
+Iteration 4:  Log pseudolikelihood = -12594.767  
+
+Logistic regression                                    Number of obs =  22,306
+                                                       Wald chi2(39) = 2562.61
+                                                       Prob > chi2   =  0.0000
+Log pseudolikelihood = -12594.767                      Pseudo R2     =  0.1089
+
+------------------------------------------------------------------------------
+             |               Robust
+nonvoter_g~p | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |  -.2499775   .0345389    -7.24   0.000    -.3176726   -.1822825
+         age |   -.037528   .0058683    -6.40   0.000    -.0490296   -.0260264
+             |
+ c.age#c.age |   .0001543   .0000601     2.57   0.010     .0000365    .0002722
+             |
+   educ_3cat |
+Medium Ed..  |  -.3106272   .0506899    -6.13   0.000    -.4099776   -.2112768
+High Educ..  |  -.5724109   .0590969    -9.69   0.000    -.6882386   -.4565831
+             |
+     1.urban |    -.02447   .0330963    -0.74   0.460    -.0893376    .0403977
+relig_attend |  -.0619427   .0093299    -6.64   0.000    -.0802289   -.0436566
+   1.in_work |  -.0366004   .0449025    -0.82   0.415    -.1246078    .0514069
+   econ_diff |   .1535911   .0164611     9.33   0.000     .1213279    .1858544
+             |
+oesch8_class |
+Small bus..  |   -.035427    .109731    -0.32   0.747    -.2504958    .1796418
+Technical..  |   .0596459   .1110172     0.54   0.591    -.1579438    .2772357
+Productio..  |   .2008462   .1069889     1.88   0.060    -.0088481    .4105406
+(Associat..  |  -.0721002    .103972    -0.69   0.488    -.2758816    .1316811
+     Clerks  |   .0972663   .1078971     0.90   0.367    -.1142082    .3087408
+Socio-cul..  |   .0063983   .1056484     0.06   0.952    -.2006687    .2134653
+Service w..  |   .2570293   .1058033     2.43   0.015     .0496586    .4644001
+Never Wor..  |   .3820924   .1249972     3.06   0.002     .1371024    .6270823
+             |
+male_pol_l~d |   .0054105   .0257162     0.21   0.833    -.0449923    .0558134
+ trad_bwnorm |   .0271013   .0162212     1.67   0.095    -.0046918    .0588943
+  gay_father |   .0712666   .0136666     5.21   0.000     .0444805    .0980526
+             |
+     country |
+100. BG-B..  |  -.5892429   .1135569    -5.19   0.000    -.8118104   -.3666754
+191. HR-C..  |   .4240892   .1049301     4.04   0.000       .21843    .6297484
+203. CZ-C..  |  -.2477933   .1073134    -2.31   0.021    -.4581237   -.0374628
+208. DK-D..  |  -1.361917   .1256114   -10.84   0.000    -1.608111   -1.115723
+246. FI-F..  |  -.2535533   .1085611    -2.34   0.020    -.4663292   -.0407775
+250. FR-F..  |   -.871083   .1030376    -8.45   0.000    -1.073033   -.6691332
+276. DE-G..  |  -.3722541   .1059947    -3.51   0.000    -.5799999   -.1645083
+300. GR-G..  |   -.428547   .1163572    -3.68   0.000    -.6566029   -.2004912
+348. HU-H..  |  -.5045713   .1141174    -4.42   0.000    -.7282372   -.2809054
+380. IT-I..  |   .3148898   .1100122     2.86   0.004     .0992699    .5305096
+440. LT-L..  |   .6404941   .1093387     5.86   0.000     .4261942     .854794
+528. NL-N..  |  -1.479663   .1225212   -12.08   0.000      -1.7198   -1.239526
+578. NO-N..  |  -.9816859   .1198812    -8.19   0.000    -1.216649   -.7467232
+616. PL-P..  |  -.0401523   .1104932    -0.36   0.716     -.256715    .1764104
+703. SK-S..  |    -.75954   .1213935    -6.26   0.000    -.9974669    -.521613
+705. SI-S..  |  -.4395135   .1128267    -3.90   0.000    -.6606498   -.2183772
+724. ES-S..  |  -.0069426   .1037031    -0.07   0.947    -.2101968    .1963117
+752. SE-S..  |  -1.444446   .1222788   -11.81   0.000    -1.684108   -1.204784
+756. CH-S..  |   .0978102   .0969473     1.01   0.313     -.092203    .2878234
+             |
+       _cons |   .9660869   .2113565     4.57   0.000     .5518358    1.380338
+------------------------------------------------------------------------------
+
+. 
+. estimates store selection_model
+
+. 
+. esttab selection_model, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N, labels("Observations") fmt(0)) ///
+>     label nobaselevels ///
+>     keep(*male* age *educ_3cat* *econ_diff* *male_pol_lead* *trad_bwnorm* *ga
+> y_father*) ///
+>     title("Table A13. Predictors of Non-Voter Exclusion") ///
+>     addnotes("Note: Logit predicting exclusion (1=excluded non-voter, 0=inclu
+> ded). Country fixed effects included but omitted for readability. Coefficient
+> s are Log-Odds. Robust SEs in parentheses. * p<0.05, ** p<0.01, *** p<0.001."
+> )
+
+Table A13. Predictors of Non-Voter Exclusion
+------------------------------------
+                              (1)   
+                     nonvoter_g~p   
+                             b/se   
+------------------------------------
+nonvoter_group                      
+Male Respondent (D~1       -0.250***
+                          (0.035)   
+Age of Respondent ~)       -0.038***
+                          (0.006)   
+Medium Education           -0.311***
+                          (0.051)   
+High Education             -0.572***
+                          (0.059)   
+Difficulty making ~g        0.154***
+                          (0.016)   
+Prefers Male Polit~i        0.005   
+                          (0.026)   
+Men should earn, W~e        0.027   
+                          (0.016)   
+Same-sex male coup~c        0.071***
+                          (0.014)   
+------------------------------------
+Observations                22306   
+------------------------------------
+Note: Logit predicting exclusion (1=excluded non-voter, 0=included). Country fi
+> xed effects included but omitted for readability. Coefficients are Log-Odds. 
+> Robust SEs in parentheses. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * TABLE A14. Analytic Sample vs. Excluded (Voted but Missing Core Attitudes)
+. * TABLE A15. Categorical Variables by Group (Column % and chi2)
+. * TABLE A16. Predictors of Core-Attitude Item Non-Response
+. *****************************************************************************
+> ***
+. * This group DID vote (rr_vote observed), but is missing on >=1 of the three
+. * core independent variables (male_pol_lead, trad_bwnorm, gay_father). Becaus
+> e
+. * their vote choice is known, we can test directly whether item non-response
+. * on the attitude battery is related to actual PRR support.
+. 
+. capture drop coreiv_missing
+
+. gen coreiv_missing = missing(male_pol_lead) | missing(trad_bwnorm) | missing(
+> gay_father)
+
+. 
+. capture drop coreiv_group
+
+. gen coreiv_group = .
+(28,963 missing values generated)
+
+. replace coreiv_group = 0 if estimation_sample == 1
+(14,963 real changes made)
+
+. replace coreiv_group = 1 if !missing(rr_vote) & prr_available == 1 & coreiv_m
+> issing == 1
+(1,108 real changes made)
+
+. 
+. label define civg_lbl 0 "Included (Analytic Sample)" 1 "Excluded (Missing Cor
+> e IV, but Voted)"
+
+. label values coreiv_group civg_lbl
+
+. 
+. tab coreiv_group, missing
+
+                         coreiv_group |      Freq.     Percent        Cum.
+--------------------------------------+-----------------------------------
+           Included (Analytic Sample) |     14,963       51.66       51.66
+Excluded (Missing Core IV, but Voted) |      1,108        3.83       55.49
+                                    . |     12,892       44.51      100.00
+--------------------------------------+-----------------------------------
+                                Total |     28,963      100.00
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A14. PRR Vote Share by Core-IV Missingness (Direct Test) +
+. *            Balance Table on Demographics
+. * -------------------------------------------------------------------------
+. display ""
+
+
+. display "*****************************************************"
+*****************************************************
+
+. display "--- TABLE A14 (direct test): PRR Vote Share - Core-IV-Complete vs. C
+> ore-IV-Missing (among valid voters) ---"
+--- TABLE A14 (direct test): PRR Vote Share - Core-IV-Complete vs. Core-IV-Miss
+> ing (among valid voters) ---
+
+. display "*****************************************************"
+*****************************************************
+
+. ttest rr_vote if !missing(rr_vote) & prr_available == 1, by(coreiv_missing) u
+> nequal
+
+Two-sample t test with unequal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  16,641    .1647738    .0028759    .3709874    .1591367    .1704108
+       1 |   1,108    .1931408    .0118648    .3949408    .1698607    .2164209
+---------+--------------------------------------------------------------------
+Combined |  17,749    .1665446    .0027966    .3725793     .161063    .1720262
+---------+--------------------------------------------------------------------
+    diff |            -.028367    .0122084               -.0523184   -.0044156
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  -2.3236
+H0: diff = 0                     Satterthwaite's degrees of freedom =  1240.61
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0102         Pr(|T| > |t|) = 0.0203          Pr(T > t) = 0.9898
+
+. 
+. estpost ttest male age relig_attend in_work econ_diff ///
+>     if !missing(coreiv_group), by(coreiv_group) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t) 
+-------------+-------------------------------------------------------
+        male |  .0111846      16065   .0155673   .7184702   1269.014 
+         age | -4.961378      16046   .5418311  -9.156688    1229.79 
+relig_attend | -.1160778      16021   .0638516  -1.817929   1200.592 
+     in_work |  .1097536      16026   .0158379   6.929819   1207.762 
+   econ_diff | -.1149221      15987   .0340251  -3.377563   1172.339 
+
+             |    e(p_l)       e(p)     e(p_u)     e(N_1)    e(mu_1) 
+-------------+-------------------------------------------------------
+        male |  .7637002   .4725997   .2362998      14963   .4721647 
+         age |  1.09e-19   2.17e-19          1      14963   53.03308 
+relig_attend |   .034662   .0693241    .965338      14963   2.783733 
+     in_work |         1   6.84e-12   3.42e-12      14963   .6252757 
+   econ_diff |  .0003777   .0007553   .9996223      14963    2.67707 
+
+             |    e(N_2)    e(mu_2) 
+-------------+----------------------
+        male |      1102     .46098 
+         age |      1083   57.99446 
+relig_attend |      1058   2.899811 
+     in_work |      1063   .5155221 
+   econ_diff |      1024   2.791992 
+
+. 
+. esttab ., ///
+>     cells("mu_1(fmt(3) label(Included)) mu_2(fmt(3) label(Excluded)) b(fmt(3)
+>  label(Diff)) se(fmt(3) label(SE)) t(fmt(2) label(t)) p(fmt(3) label(p-value)
+> )") ///
+>     noobs label ///
+>     title("Table A14. Analytic Sample vs. Excluded (Voted but Missing Core At
+> titudes)") ///
+>     addnotes("Note: Welch (unequal-variance) t-tests. Excluded = voted (rr_vo
+> te observed) but missing on >=1 of male_pol_lead/trad_bwnorm/gay_father.")
+
+Table A14. Analytic Sample vs. Excluded (Voted but Missing Core Attitudes)
+-------------------------------------------------------------------------------
+> -------------------
+                              (1)                                              
+>                    
+                                                                               
+>                    
+                         Included     Excluded         Diff           SE       
+>      t      p-value
+-------------------------------------------------------------------------------
+> -------------------
+Male Respondent (D~)        0.472        0.461        0.011        0.016       
+>   0.72        0.473
+Age of Respondent ~)       53.033       57.994       -4.961        0.542       
+>  -9.16        0.000
+Religious Attendan~e        2.784        2.900       -0.116        0.064       
+>  -1.82        0.069
+Currently in Paid ~)        0.625        0.516        0.110        0.016       
+>   6.93        0.000
+Difficulty making ~g        2.677        2.792       -0.115        0.034       
+>  -3.38        0.001
+-------------------------------------------------------------------------------
+> -------------------
+Note: Welch (unequal-variance) t-tests. Excluded = voted (rr_vote observed) but
+>  missing on >=1 of male_pol_lead/trad_bwnorm/gay_father.
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A15. Categorical Variables by Group (chi2)
+. * -------------------------------------------------------------------------
+. display ""
+
+
+. display "*****************************************************"
+*****************************************************
+
+. display "--- TABLE A15. CATEGORICAL VARIABLES BY GROUP (COLUMN % AND CHI2) --
+> -"
+--- TABLE A15. CATEGORICAL VARIABLES BY GROUP (COLUMN % AND CHI2) ---
+
+. display "*****************************************************"
+*****************************************************
+
+. tab educ_3cat coreiv_group if !missing(coreiv_group), col chi2
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+Highest Level of |
+    Education (3 |     coreiv_group
+     Categories) | Included   Excluded  |     Total
+-----------------+----------------------+----------
+   Low Education |     1,653        188 |     1,841 
+                 |     11.05      17.77 |     11.49 
+-----------------+----------------------+----------
+Medium Education |     6,323        455 |     6,778 
+                 |     42.26      43.01 |     42.31 
+-----------------+----------------------+----------
+  High Education |     6,987        415 |     7,402 
+                 |     46.70      39.22 |     46.20 
+-----------------+----------------------+----------
+           Total |    14,963      1,058 |    16,021 
+                 |    100.00     100.00 |    100.00 
+
+          Pearson chi2(2) =  50.9223   Pr = 0.000
+
+. tab oesch8_class coreiv_group if !missing(coreiv_group), col chi2
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+    class Oesch class |     coreiv_group
+ position - 8 classes | Included   Excluded  |     Total
+----------------------+----------------------+----------
+Self-employed profess |       510         38 |       548 
+                      |      3.41       3.87 |      3.44 
+----------------------+----------------------+----------
+Small business owners |     1,426         93 |     1,519 
+                      |      9.53       9.48 |      9.53 
+----------------------+----------------------+----------
+Technical (semi-)prof |     1,362         95 |     1,457 
+                      |      9.10       9.68 |      9.14 
+----------------------+----------------------+----------
+   Production workers |     2,008        161 |     2,169 
+                      |     13.42      16.41 |     13.60 
+----------------------+----------------------+----------
+ (Associate) managers |     2,917        155 |     3,072 
+                      |     19.49      15.80 |     19.27 
+----------------------+----------------------+----------
+               Clerks |     1,576        108 |     1,684 
+                      |     10.53      11.01 |     10.56 
+----------------------+----------------------+----------
+Socio-cultural (semi- |     2,473        153 |     2,626 
+                      |     16.53      15.60 |     16.47 
+----------------------+----------------------+----------
+      Service workers |     2,166        141 |     2,307 
+                      |     14.48      14.37 |     14.47 
+----------------------+----------------------+----------
+Never Worked / Outsid |       525         37 |       562 
+                      |      3.51       3.77 |      3.52 
+----------------------+----------------------+----------
+                Total |    14,963        981 |    15,944 
+                      |    100.00     100.00 |    100.00 
+
+          Pearson chi2(8) =  14.3734   Pr = 0.073
+
+. display "*****************************************************"
+*****************************************************
+
+. 
+. * -------------------------------------------------------------------------
+. * TABLE A16. Joint Selection Model (What Independently Predicts Core-IV
+. *            Item Non-Response, Including Actual Vote Choice?)
+. * -------------------------------------------------------------------------
+. logit coreiv_group i.male c.age##c.age i.educ_3cat i.urban c.relig_attend i.i
+> n_work ///
+>     c.econ_diff i.oesch8_class i.rr_vote i.country ///
+>     if !missing(coreiv_group), vce(robust)
+
+Iteration 0:  Log pseudolikelihood = -3246.9972  
+Iteration 1:  Log pseudolikelihood = -3133.8722  
+Iteration 2:  Log pseudolikelihood = -3119.0572  
+Iteration 3:  Log pseudolikelihood =  -3118.881  
+Iteration 4:  Log pseudolikelihood = -3118.8805  
+Iteration 5:  Log pseudolikelihood = -3118.8805  
+
+Logistic regression                                     Number of obs = 15,791
+                                                        Wald chi2(37) = 232.86
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -3118.8805                       Pseudo R2     = 0.0395
+
+------------------------------------------------------------------------------
+             |               Robust
+coreiv_group | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.male |  -.0754356   .0781788    -0.96   0.335    -.2286631     .077792
+         age |  -.0206718    .013914    -1.49   0.137    -.0479427     .006599
+             |
+ c.age#c.age |   .0003269   .0001312     2.49   0.013     .0000697    .0005842
+             |
+   educ_3cat |
+Medium Ed..  |  -.1656494   .1145728    -1.45   0.148     -.390208    .0589093
+High Educ..  |  -.4351054   .1297685    -3.35   0.001     -.689447   -.1807639
+             |
+     1.urban |  -.0050096   .0772128    -0.06   0.948    -.1563438    .1463247
+relig_attend |   .0352398   .0216683     1.63   0.104    -.0072293     .077709
+   1.in_work |   .0324271   .1053975     0.31   0.758    -.1741481    .2390024
+   econ_diff |   .0733011   .0365695     2.00   0.045     .0016261    .1449761
+             |
+oesch8_class |
+Small bus..  |   -.272657   .2215438    -1.23   0.218    -.7068749     .161561
+Technical..  |  -.0609289   .2188568    -0.28   0.781    -.4898803    .3680226
+Productio..  |  -.0725729   .2109675    -0.34   0.731    -.4860616    .3409157
+(Associat..  |  -.3265533   .2049501    -1.59   0.111    -.7282481    .0751415
+     Clerks  |  -.2487576   .2191479    -1.14   0.256    -.6782796    .1807643
+Socio-cul..  |  -.1455968   .2081267    -0.70   0.484    -.5535177    .2623241
+Service w..  |  -.3227435    .215285    -1.50   0.134    -.7446942    .0992073
+Never Wor..  |  -.2097386   .2855852    -0.73   0.463    -.7694754    .3499982
+             |
+     rr_vote |
+Populist ..  |   .2483383   .1060205     2.34   0.019     .0405419    .4561348
+             |
+     country |
+100. BG-B..  |  -1.641323   .2919788    -5.62   0.000    -2.213591   -1.069055
+191. HR-C..  |  -1.973415   .3610885    -5.47   0.000    -2.681135   -1.265694
+203. CZ-C..  |   -1.13085   .2549174    -4.44   0.000    -1.630479   -.6312212
+208. DK-D..  |  -.2555874   .1955125    -1.31   0.191     -.638785    .1276101
+246. FI-F..  |  -.3600802   .2155095    -1.67   0.095    -.7824711    .0623108
+250. FR-F..  |  -.8013973   .1957001    -4.10   0.000    -1.184962   -.4178322
+276. DE-G..  |  -.3447408    .197005    -1.75   0.080    -.7308634    .0413819
+300. GR-G..  |  -.2527576   .2249048    -1.12   0.261    -.6935629    .1880476
+348. HU-H..  |  -1.101545   .2519189    -4.37   0.000    -1.595297   -.6077933
+380. IT-I..  |  -1.253204   .2751082    -4.56   0.000    -1.792406   -.7140018
+440. LT-L..  |  -.4425863   .2378859    -1.86   0.063    -.9088342    .0236615
+528. NL-N..  |   -.907958   .2085765    -4.35   0.000     -1.31676   -.4991557
+578. NO-N..  |  -.8337279   .2302168    -3.62   0.000    -1.284944   -.3825113
+616. PL-P..  |  -.8680327    .244969    -3.54   0.000    -1.348163   -.3879023
+703. SK-S..  |  -2.615577   .4460952    -5.86   0.000    -3.489908   -1.741247
+705. SI-S..  |  -.5317134    .213477    -2.49   0.013    -.9501208   -.1133061
+724. ES-S..  |  -1.245735   .2536045    -4.91   0.000    -1.742791   -.7486795
+752. SE-S..  |  -.5504673   .1928017    -2.86   0.004    -.9283517   -.1725828
+756. CH-S..  |  -.9916266   .2158993    -4.59   0.000    -1.414782   -.5684718
+             |
+       _cons |  -1.939517    .465616    -4.17   0.000    -2.852108   -1.026927
+------------------------------------------------------------------------------
+
+. 
+. estimates store coreiv_selection_model
+
+. 
+. esttab coreiv_selection_model, ///
+>     cells(b(star fmt(3)) se(par fmt(3))) ///
+>     starlevels(* 0.05 ** 0.01 *** 0.001) ///
+>     stats(N, labels("Observations") fmt(0)) ///
+>     label nobaselevels ///
+>     keep(*male* age *educ_3cat* *econ_diff* *rr_vote*) ///
+>     title("Table A16. Predictors of Core-IV Item Non-Response") ///
+>     addnotes("Note: Logit predicting exclusion (1=voted but missing core IV, 
+> 0=included). Country fixed effects included but omitted for readability. Coef
+> ficients are Log-Odds. Robust SEs in parentheses. * p<0.05, ** p<0.01, *** p<
+> 0.001.")
+
+Table A16. Predictors of Core-IV Item Non-Response
+------------------------------------
+                              (1)   
+                     coreiv_group   
+                             b/se   
+------------------------------------
+coreiv_group                        
+Male Respondent (D~1       -0.075   
+                          (0.078)   
+Age of Respondent ~)       -0.021   
+                          (0.014)   
+Medium Education           -0.166   
+                          (0.115)   
+High Education             -0.435***
+                          (0.130)   
+Difficulty making ~g        0.073*  
+                          (0.037)   
+Populist Radical R~t        0.248*  
+                          (0.106)   
+------------------------------------
+Observations                15791   
+------------------------------------
+Note: Logit predicting exclusion (1=voted but missing core IV, 0=included). Cou
+> ntry fixed effects included but omitted for readability. Coefficients are Log
+> -Odds. Robust SEs in parentheses. * p<0.05, ** p<0.01, *** p<0.001.
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:/Users/Francesco/Desktop/POSTDOC_MILANO_STATALE/PROJECTS/ONGOING
+> /Special_Issue_Family_Gender_Roles/DATA/Replication_Package/Output/Logs/03_Su
+> pplementary_Material__9_Jul_2026.log
+  log type:  text
+ closed on:   9 Jul 2026, 10:31:51
+-------------------------------------------------------------------------------
