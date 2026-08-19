@@ -4,7 +4,12 @@ REPLICATION PACKAGE
 Defending Patriarchal Arrangements: Explaining Men's Disproportionate
 Support for Populist Radical Right Parties in Europe
 
-[Author names and affiliations removed for peer review]
+Francesco Marolla (University of Milan)
+
+Published Article Reference:
+This repository contains the replication package for the final published article.
+Published in: International Journal of Sociology
+DOI: 10.1080/00207659.2026.2718743
 
 This package follows an Input -> Process -> Output (IPO) structure:
 
